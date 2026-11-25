@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RUTA · El caso bajo decisión</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: sobria, cinematográfica y profesional: un laboratorio de análisis, no un juego infantil.
+   IDEA: un expediente jurídico abierto sobre una mesa de luz digital.
+   PICTURE: la carpeta del expediente y la ruta luminosa de ocho etapas que se enciende con cada decisión.
+   COLOUR and TYPE: azul noche y azul profundo; azul eléctrico y turquesa para la luz; dorado para logros, rojo para riesgos. Sora + Inter; Plex Mono solo en documentos.
+   LAYOUT: barra superior, módulos de ancho completo, panel lateral de ruta en cada expediente; todo se apila en móvil. */
+:root{color-scheme:dark;--bg:#0B1120;--deep:#14243A;--blue:#4CA9FF;--tq:#40E0D0;--ink:#F3F6FC;--mut:#9DB0CA;--gold:#F4B942;--red:#F06464;--line:rgba(76,169,255,.2);--panel:rgba(20,36,58,.66);--r:16px}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:radial-gradient(1200px 700px at 80% -10%,#16305a 0,transparent 60%),radial-gradient(900px 600px at -10% 110%,#0f3a44 0,transparent 55%),var(--bg);background-attachment:fixed;color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.55}
+h1,h2,h3,h4{font-family:Sora,Inter,sans-serif;line-height:1.1;margin:0 0 .4em;text-wrap:balance}
+h2{font-size:clamp(28px,4vw,44px);font-weight:700}
+h3{font-size:clamp(19px,2.2vw,23px);font-weight:600}
+h4{font-size:15px;font-weight:600;color:var(--mut)}
+p{margin:0 0 .8em}
+a{color:var(--tq)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--tq);outline-offset:3px;border-radius:8px}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:clamp(20px,3.5vw,48px) max(4vw,16px) 40px}
+.mut{color:var(--mut)}.small{font-size:13.5px}.gold{color:var(--gold)}.red{color:var(--red)}.tq{color:var(--tq)}
+.grid{display:grid;gap:18px}.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}.gw{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:clamp(16px,2.2vw,24px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 20px 50px -30px #000,inset 0 1px 0 rgba(255,255,255,.04)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:12px;border:1px solid var(--line);background:rgba(76,169,255,.08);color:var(--ink);font-weight:600;font-size:15px;transition:transform .2s,background .2s,border-color .2s,box-shadow .2s;text-decoration:none}
+.btn:hover{background:rgba(76,169,255,.16);border-color:rgba(76,169,255,.5);transform:translateY(-1px)}
+.btn-p{background:linear-gradient(135deg,#2f8ff0,#3cc9c0);border:0;color:#04121f;box-shadow:0 10px 30px -10px rgba(64,224,208,.6)}
+.btn-p:hover{background:linear-gradient(135deg,#4ca9ff,#40e0d0);box-shadow:0 14px 36px -10px rgba(64,224,208,.85)}
+.btn-g{background:transparent}
+.btn svg{width:18px;height:18px;flex:none}
+.btn-d{border-color:rgba(240,100,100,.4);background:rgba(240,100,100,.08)}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:rgba(76,169,255,.08);white-space:nowrap}
+.tag.ok{color:var(--tq);border-color:rgba(64,224,208,.4);background:rgba(64,224,208,.08)}
+.tag.gold{border-color:rgba(244,185,66,.45);background:rgba(244,185,66,.1)}
+.tag.red{border-color:rgba(240,100,100,.45);background:rgba(240,100,100,.1)}
+.bar{height:8px;border-radius:9px;background:rgba(255,255,255,.07);overflow:hidden}
+.bar>i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,var(--blue),var(--tq));transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.bar.g>i{background:linear-gradient(90deg,#d99a1f,var(--gold))}
+.disc{font-size:13px;color:var(--mut);border-top:1px solid var(--line);margin-top:36px;padding-top:16px}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:rgba(11,17,32,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:8px max(4vw,16px)}
+.brand{font:800 22px Sora,system-ui,sans-serif;letter-spacing:.12em;background:none;border:0;padding:6px 0;background:linear-gradient(90deg,var(--ink),var(--tq));-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav{display:flex;gap:4px;overflow-x:auto;flex:1;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
+.nav button{flex:none;background:none;border:0;padding:10px 12px;border-radius:10px;color:var(--mut);font-size:14px;font-weight:500;min-height:44px}
+.nav button:hover{color:var(--ink);background:rgba(76,169,255,.08)}
+.nav button.on{color:var(--ink);background:rgba(76,169,255,.14);box-shadow:inset 0 -2px 0 var(--tq)}
+.tools{display:flex;gap:8px;align-items:center}
+.chip{font-size:13px;padding:6px 12px;border-radius:99px;border:1px solid rgba(244,185,66,.35);color:var(--gold);white-space:nowrap}
+.icob{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(76,169,255,.06);display:grid;place-items:center}
+.icob svg{width:20px;height:20px}
+@media(max-width:760px){.phases span{font-size:11.5px}.chip{display:none}.top-in{gap:8px}.brand{font-size:19px}}
+/* views */
+.view{animation:viewIn .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes viewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.head{margin-bottom:26px}.head p{max-width:68ch}
+.eyebrow{font:600 13px Inter;color:var(--tq);margin-bottom:8px;display:block}
+/* hero */
+.hero{min-height:calc(100vh - 0px);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(20px,4vw,60px);align-items:center;position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:40px max(4vw,16px)}
+.logo{font:800 clamp(84px,15vw,190px)/.9 Sora,system-ui,sans-serif;letter-spacing:.06em;margin:0;display:flex}
+.logo span{display:inline-block;background:linear-gradient(180deg,#fff 10%,#9fd0ff 60%,var(--tq));-webkit-background-clip:text;background-clip:text;color:transparent;animation:letter 1.1s cubic-bezier(.2,.8,.2,1) both;filter:drop-shadow(0 0 30px rgba(76,169,255,.35))}
+.logo span:nth-child(2){animation-delay:.12s}.logo span:nth-child(3){animation-delay:.24s}.logo span:nth-child(4){animation-delay:.36s}
+@keyframes letter{from{opacity:0;transform:translateY(40px) scale(.9);filter:blur(12px)}to{opacity:1;transform:none}}
+.sub{font:600 clamp(16px,2vw,21px) Sora,system-ui,sans-serif;letter-spacing:.32em;color:var(--tq);margin:10px 0 4px;animation:fadeUp .8s .6s both}
+.sub2{color:var(--mut);margin-bottom:22px;animation:fadeUp .8s .7s both}
+.quote{font:300 clamp(20px,2.4vw,28px)/1.3 Sora,system-ui,sans-serif;margin:0 0 26px;animation:fadeUp .8s .85s both;max-width:26ch}
+.hero .btn-p{animation:fadeUp .8s 1s both,pulse 3s 2s infinite}
+.big{font-size:17px;padding:16px 28px;letter-spacing:.06em}
+.lead{color:var(--mut);max-width:58ch;margin-top:26px;animation:fadeUp .8s 1.15s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{box-shadow:0 10px 30px -10px rgba(64,224,208,.6)}50%{box-shadow:0 10px 50px -6px rgba(64,224,208,.95)}}
+.hero-pic{position:relative;aspect-ratio:1/1;max-height:560px;width:100%;animation:fadeUp 1s .4s both}
+.desk{position:absolute;inset:6% 4%;border-radius:28px;background:radial-gradient(circle at 50% 40%,rgba(76,169,255,.22),transparent 65%);border:1px solid var(--line)}
+.folder{position:absolute;left:14%;top:20%;width:66%;height:58%;transform:rotate(-5deg);transform-style:preserve-3d}
+.folder .back{position:absolute;inset:0;border-radius:6px 16px 16px 16px;background:linear-gradient(160deg,#1d3a5e,#122640);border:1px solid rgba(76,169,255,.35)}
+.folder .back::before{content:"";position:absolute;left:0;top:-22px;width:38%;height:24px;border-radius:10px 10px 0 0;background:#1d3a5e;border:1px solid rgba(76,169,255,.35);border-bottom:0}
+.paper{position:absolute;left:7%;right:7%;top:8%;bottom:6%;background:#F3F6FC;border-radius:6px;padding:8% 9%;color:#14243A;font:500 clamp(9px,1.1vw,12px)/1.7 "IBM Plex Mono",monospace;box-shadow:0 10px 30px -10px #000;transform:rotate(3deg)}
+.paper.p2{transform:rotate(-2deg) translate(4%,4%);background:#e3eaf6}
+.paper b{display:block;font:700 1.3em Sora,system-ui,sans-serif;margin-bottom:8px}
+.paper i{display:block;height:6px;border-radius:3px;background:#c8d4e8;margin:8px 0}
+.cover{position:absolute;inset:0;border-radius:6px 16px 16px 16px;background:linear-gradient(160deg,#24507f,#173459);border:1px solid rgba(76,169,255,.5);transform-origin:left center;animation:coverOpen 2.2s 1s cubic-bezier(.6,.1,.2,1) forwards;display:grid;place-items:center;backface-visibility:hidden}
+.cover span{font:700 clamp(14px,2vw,22px) Sora,system-ui,sans-serif;letter-spacing:.2em;color:var(--ink);opacity:.85}
+@keyframes coverOpen{to{transform:perspective(1400px) rotateY(-110deg);opacity:.15}}
+.stamp{position:absolute;right:6%;bottom:12%;transform:rotate(-12deg);border:3px solid var(--gold);color:var(--gold);font:800 clamp(12px,1.6vw,18px) Sora,system-ui,sans-serif;letter-spacing:.12em;padding:6px 14px;border-radius:8px;opacity:0;animation:stamp .5s 2.8s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes stamp{from{opacity:0;transform:rotate(-12deg) scale(2)}to{opacity:.9;transform:rotate(-12deg) scale(1)}}
+.hero-route{position:absolute;inset:0;width:100%;height:100%}
+.hero-route path{stroke-dasharray:900;stroke-dashoffset:900;animation:draw 3s 1.4s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.hero-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;animation:fadeUp .8s 1.3s both}
+@media(max-width:860px){.hero{grid-template-columns:1fr;min-height:auto;padding-top:28px}.hero-pic{max-width:420px;margin:0 auto;order:-1;aspect-ratio:1.2/1}}
+/* dashboard */
+.prof{display:flex;gap:16px;align-items:center}
+.avatar{width:64px;height:64px;border-radius:18px;flex:none;display:grid;place-items:center;font:700 24px Sora,system-ui,sans-serif;background:linear-gradient(135deg,#1f4c80,#167a7c);border:1px solid rgba(64,224,208,.4)}
+.inp{width:100%;min-height:44px;font:16px Inter;color:var(--ink);background:rgba(11,17,32,.6);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea.inp{min-height:96px;resize:vertical}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:14px}
+.kpi b{display:block;font:700 clamp(28px,3.4vw,38px) Sora,system-ui,sans-serif;line-height:1.1}
+.kpi span{font-size:13.5px;color:var(--mut)}
+.ring{width:132px;height:132px;flex:none}
+.ring circle{fill:none;stroke-width:10}
+.ring .tr{stroke:rgba(255,255,255,.07)}
+.ring .fg{stroke:url(#gr);stroke-linecap:round;transition:stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)}
+.skill{display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:4px 12px;align-items:center;margin-bottom:12px}
+.skill span{font-size:14.5px}.skill em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;color:var(--mut);font-size:14px}
+.skill .bar{grid-column:1/-1}
+.track{display:flex;align-items:center;gap:0;overflow-x:auto;padding:8px 2px}
+.node{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;width:108px;text-align:center;font-size:12.5px;color:var(--mut)}
+.node i{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);font:700 13px Sora,system-ui,sans-serif;font-style:normal;color:var(--mut);background:var(--bg)}
+.node.on i{border-color:var(--tq);color:var(--tq);box-shadow:0 0 18px rgba(64,224,208,.5)}
+.node.on{color:var(--ink)}
+.link{flex:1;min-width:24px;height:2px;background:var(--line);margin-bottom:24px}
+.link.on{background:linear-gradient(90deg,var(--tq),var(--blue));box-shadow:0 0 10px rgba(64,224,208,.5)}
+/* case cards */
+.ccard{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:10px;transition:transform .3s,border-color .3s,box-shadow .3s}
+.ccard:hover{transform:translateY(-4px);border-color:rgba(64,224,208,.45);box-shadow:0 30px 60px -30px rgba(64,224,208,.35)}
+.ccard .num{font:500 13px "IBM Plex Mono",monospace;color:var(--tq)}
+.ccard::after{content:"";position:absolute;right:-60px;top:-60px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(76,169,255,.25),transparent 70%)}
+.meta{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px;margin:4px 0}
+.meta dt{color:var(--mut)}.meta dd{margin:0}
+.dots{letter-spacing:2px;color:var(--gold)}
+.done-badge{position:absolute;top:16px;right:16px;z-index:1}
+/* case play */
+.case{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+@media(max-width:980px){.case{grid-template-columns:1fr}.side{order:2}}
+.side{display:grid;gap:14px;position:sticky;top:76px}
+@media(max-width:980px){.side{position:static}}
+.phases{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.phases span{flex:1;min-width:52px;font-size:12.5px;color:var(--mut);padding-top:8px;border-top:3px solid rgba(255,255,255,.08);transition:all .5s}
+.phases span.on{border-color:var(--tq);color:var(--ink)}
+.phases span.now{border-color:var(--blue);color:var(--ink);font-weight:600}
+.narr{font:400 17px/1.7 Inter;min-height:3em}
+.caret::after{content:"▍";color:var(--tq);animation:blink 1s steps(2) infinite;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+.opening{position:relative;height:150px;margin:-6px 0 18px;perspective:1200px}
+.opening .f{position:absolute;inset:0 10%;border-radius:10px 18px 18px 18px;background:linear-gradient(160deg,#1d3a5e,#122640);border:1px solid rgba(76,169,255,.35);display:flex;align-items:center;padding:0 6%;gap:18px}
+.opening .f b{font:700 clamp(18px,3vw,30px) Sora,system-ui,sans-serif}
+.opening .lid{position:absolute;inset:0 10%;border-radius:10px 18px 18px 18px;background:linear-gradient(160deg,#2a5a8f,#173459);border:1px solid rgba(76,169,255,.5);transform-origin:top;animation:lid 1.4s .2s cubic-bezier(.6,.1,.2,1) forwards;display:grid;place-items:center;font:700 16px Sora,system-ui,sans-serif;letter-spacing:.2em}
+@keyframes lid{to{transform:rotateX(-100deg);opacity:0}}
+.client{display:flex;gap:14px;align-items:center;margin:16px 0}
+.client .avatar{width:52px;height:52px;font-size:19px;border-radius:14px}
+.note{border-left:3px solid var(--gold);background:rgba(244,185,66,.07);padding:10px 14px;border-radius:0 10px 10px 0;font-size:14.5px;margin:14px 0}
+.note.red{border-color:var(--red);background:rgba(240,100,100,.08)}
+.note.tq{border-color:var(--tq);background:rgba(64,224,208,.06)}
+.evs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:14px}
+.ev{text-align:left;position:relative;min-height:150px;padding:18px 16px 16px;border-radius:12px;background:linear-gradient(170deg,#e9eff9,#cdd8ea);color:#14243A;border:0;box-shadow:0 14px 30px -14px #000;transition:transform .3s,box-shadow .3s;display:flex;flex-direction:column;gap:6px}
+.ev:hover{transform:translateY(-6px) rotate(-1deg);box-shadow:0 24px 40px -16px #000,0 0 0 2px var(--tq)}
+.ev small{font:500 11.5px "IBM Plex Mono",monospace;color:#3d5577}
+.ev b{font:600 16px/1.25 Sora,system-ui,sans-serif}
+.ev .st{margin-top:auto;font-size:12.5px;font-weight:600;color:#3d5577}
+.ev.seen .st{color:#0d7f74}
+.ev::before{content:"";position:absolute;top:0;right:0;border-width:0 22px 22px 0;border-style:solid;border-color:#0B1120 #9fb3d1 #9fb3d1 #0B1120;border-radius:0 0 0 6px}
+.facts{display:grid;gap:10px}
+.fact{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:center;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:rgba(11,17,32,.4)}
+.fact.right{border-color:rgba(64,224,208,.5)}.fact.wrong{border-color:rgba(240,100,100,.5)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{min-height:40px;padding:6px 12px;border-radius:9px;border:1px solid var(--line);background:transparent;font-size:13.5px;color:var(--mut)}
+.seg button.on{color:#04121f;background:var(--tq);border-color:var(--tq);font-weight:600}
+.seg button.on.f{background:var(--gold);border-color:var(--gold)}
+.seg button.on.n{background:#7d8ea8;border-color:#7d8ea8}
+@media(max-width:640px){.fact{grid-template-columns:1fr}}
+.q{font:600 clamp(21px,2.6vw,27px)/1.25 Sora,system-ui,sans-serif;margin:6px 0 14px}
+.opts{display:grid;gap:12px}
+.opt{text-align:left;position:relative;padding:16px 18px 16px 52px;border-radius:14px;border:1px solid var(--line);background:rgba(11,17,32,.45);transition:all .25s;line-height:1.5}
+.opt::before{content:attr(data-k);position:absolute;left:14px;top:14px;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font:600 13px Sora,system-ui,sans-serif;border:1px solid var(--line);color:var(--mut)}
+.opt:hover{border-color:rgba(76,169,255,.55);background:rgba(76,169,255,.08);transform:translateX(3px)}
+.opt.sel{border-color:var(--tq);background:rgba(64,224,208,.08);box-shadow:0 0 0 1px var(--tq),0 10px 30px -14px rgba(64,224,208,.6)}
+.opt.sel::before{background:var(--tq);color:#04121f;border-color:var(--tq)}
+.opt.dim{opacity:.38;pointer-events:none}
+.opt.lock{pointer-events:none}
+.opt.v-riesgosa.sel{border-color:var(--red);box-shadow:0 0 0 1px var(--red),0 0 40px -10px rgba(240,100,100,.6);animation:shake .5s}
+.opt.v-riesgosa.sel::before{background:var(--red);border-color:var(--red)}
+.opt.v-insuficiente.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.opt.v-insuficiente.sel::before{background:var(--gold);border-color:var(--gold)}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.just{margin-top:18px;padding:16px;border-radius:14px;border:1px dashed rgba(76,169,255,.35);animation:fadeUp .4s both}
+.just .opts{gap:8px}.just .opt{padding:12px 14px 12px 46px;font-size:15px}.just .opt::before{top:11px;left:12px;width:24px;height:24px}
+.verdict{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;margin:18px 0 12px;animation:pop .5s cubic-bezier(.2,1.5,.4,1) both}
+.verdict svg{width:28px;height:28px;flex:none}
+.verdict b{font:700 17px Sora,system-ui,sans-serif}
+.verdict.adecuada{background:rgba(64,224,208,.1);border:1px solid rgba(64,224,208,.45)}
+.verdict.insuficiente{background:rgba(244,185,66,.1);border:1px solid rgba(244,185,66,.45)}
+.verdict.riesgosa{background:rgba(240,100,100,.12);border:1px solid rgba(240,100,100,.5);animation:pop .5s cubic-bezier(.2,1.5,.4,1) both,alarm 1.6s .5s 2}
+@keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+@keyframes alarm{50%{box-shadow:0 0 0 6px rgba(240,100,100,.15)}}
+.conseq{padding:16px 18px;border-radius:14px;background:rgba(11,17,32,.5);border:1px solid var(--line);margin-bottom:12px}
+.conseq h4{margin-bottom:6px}
+.pts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.float{position:fixed;z-index:60;font:800 22px Sora,system-ui,sans-serif;color:var(--gold);pointer-events:none;animation:floatUp 1.4s ease forwards;text-shadow:0 0 20px rgba(244,185,66,.6)}
+@keyframes floatUp{from{opacity:0;transform:translateY(10px)}20%{opacity:1}to{opacity:0;transform:translateY(-60px)}}
+.ordl{display:grid;gap:8px;counter-reset:o;margin:0;padding:0;list-style:none}
+.ordl li button,.pool button{width:100%;text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(11,17,32,.45);min-height:48px;transition:all .25s;line-height:1.4}
+.ordl li{counter-increment:o;animation:fadeUp .3s both}
+.ordl li button{display:flex;gap:12px;align-items:center;border-color:rgba(64,224,208,.45)}
+.ordl li button::before{content:counter(o);flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--tq);color:#04121f;font:700 13px Sora,system-ui,sans-serif}
+.pool{display:grid;gap:8px}
+.pool button:hover{border-color:var(--blue);background:rgba(76,169,255,.1)}
+.slot{border:1px dashed var(--line);border-radius:12px;padding:12px;color:var(--mut);font-size:14px;text-align:center}
+/* rail */
+.rail{list-style:none;margin:0;padding:0;position:relative}
+.rail li{position:relative;padding:0 0 14px 30px;font-size:14px;color:var(--mut);transition:color .6s}
+.rail li::before{content:"";position:absolute;left:6px;top:4px;width:12px;height:12px;border-radius:50%;border:2px solid #355175;background:var(--bg);transition:all .6s;z-index:1}
+.rail li::after{content:"";position:absolute;left:11px;top:16px;bottom:-2px;width:2px;background:#22385a}
+.rail li:last-child::after{display:none}
+.rail li.on{color:var(--ink)}
+.rail li.on::before{border-color:var(--tq);background:var(--tq);box-shadow:0 0 12px var(--tq)}
+.rail li.on::after{background:linear-gradient(var(--tq),#22385a)}
+.mini{display:grid;gap:7px;margin-top:12px}
+.mini div{display:grid;grid-template-columns:minmax(0,1fr) 84px;font-size:12.5px;color:var(--mut);gap:2px 8px}
+.mini em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+.mini .bar{grid-column:1/-1;height:5px}
+.evlist{display:grid;gap:6px}
+.evlist button{display:flex;justify-content:space-between;gap:8px;text-align:left;font-size:13.5px;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:transparent;min-height:40px}
+.evlist button:hover{border-color:var(--blue)}
+/* modal */
+#modal{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:16px;background:rgba(4,8,16,.72);backdrop-filter:blur(6px)}
+#modal.open{display:grid;animation:fade .3s both}
+@keyframes fade{from{opacity:0}}
+.mbox{width:min(720px,100%);max-height:88vh;overflow:auto;border-radius:14px;background:#F3F6FC;color:#14243A;box-shadow:0 40px 80px -20px #000;animation:unfold .55s cubic-bezier(.2,.9,.3,1.1) both;transform-origin:top center}
+@keyframes unfold{from{opacity:0;transform:perspective(1200px) rotateX(-35deg) translateY(-30px)}to{opacity:1;transform:none}}
+.mhead{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;background:#dfe7f3;border-bottom:1px solid #c3cfe2}
+.mhead small{font:500 12px "IBM Plex Mono",monospace;color:#3d5577}
+.mhead b{display:block;font:600 17px Sora,system-ui,sans-serif}
+.mclose{min-width:44px;min-height:44px;border-radius:10px;border:1px solid #9fb3d1;background:#fff;color:#14243A;font-size:20px}
+.mbody{padding:20px 22px 24px;font-size:15px}
+.mbody.mono{font-family:"IBM Plex Mono",monospace;font-size:14px}
+.doc table{width:100%;border-collapse:collapse;font-size:14px}
+.doc td,.doc th{padding:7px 8px;border-bottom:1px solid #d3dceb;text-align:left;vertical-align:top}
+.doc td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.doc th{font-size:12.5px;color:#3d5577}
+.doc .hl{background:#fff1c9;padding:0 3px;border-radius:3px}
+.doc .clue{margin-top:16px;padding:10px 12px;border-radius:8px;background:#e1f6f3;border-left:3px solid #1aa597;font-family:Inter;font-size:14px}
+.doc .fic{margin-top:12px;font:12px Inter;color:#5a6f8f}
+.doc h5{font:600 14px Sora,system-ui,sans-serif;margin:14px 0 6px}
+.chat{display:flex;flex-direction:column;gap:8px;font-family:Inter}
+.chat .d{align-self:center;font-size:12px;color:#5a6f8f;margin-top:6px}
+.chat p{max-width:82%;margin:0;padding:8px 12px;border-radius:12px;font-size:14.5px;line-height:1.45}
+.chat .a{align-self:flex-start;background:#fff;border:1px solid #d3dceb;border-bottom-left-radius:3px}
+.chat .b{align-self:flex-end;background:#cfe6ff;border-bottom-right-radius:3px}
+.chat small{display:block;font-size:11.5px;color:#5a6f8f;margin-top:2px}
+.mail .h{font-size:13.5px;color:#3d5577;border-bottom:1px solid #d3dceb;padding-bottom:10px;margin-bottom:12px}
+.tl{list-style:none;margin:0;padding:0 0 0 18px;border-left:2px solid #9fb3d1}
+.tl li{position:relative;padding:0 0 12px 12px}
+.tl li::before{content:"";position:absolute;left:-25px;top:6px;width:10px;height:10px;border-radius:50%;background:#2f8ff0}
+.tl b{font-family:Sora,system-ui,sans-serif;font-size:13.5px}
+/* result */
+.res-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:center}
+@media(max-width:700px){.res-top{grid-template-columns:1fr;justify-items:center;text-align:center}}
+.lvl{position:relative;width:220px;height:220px}
+.lvl svg{width:100%;height:100%;transform:rotate(-90deg)}
+.lvl circle{fill:none;stroke-width:12}
+.lvl .fg{stroke-linecap:round;transition:stroke-dashoffset 1.8s cubic-bezier(.2,.8,.2,1)}
+.lvl .c{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.lvl .c b{font:800 64px/1 Sora,system-ui,sans-serif}
+.lvl .c span{color:var(--mut);font-size:14px}
+.lvl::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:1px solid rgba(244,185,66,.3);animation:halo 2.4s ease-out infinite}
+@keyframes halo{from{transform:scale(.9);opacity:1}to{transform:scale(1.15);opacity:0}}
+.lname{font:700 clamp(26px,3.4vw,40px) Sora,system-ui,sans-serif;animation:fadeUp .8s .8s both}
+.map{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;position:relative}
+@media(max-width:820px){.map{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.map{grid-template-columns:1fr}}
+.step{position:relative;padding:16px;border-radius:14px;border:1px solid var(--line);background:rgba(11,17,32,.5);opacity:0;animation:stepIn .6s cubic-bezier(.2,.8,.2,1) forwards}
+.step .n{font:700 12px Sora,system-ui,sans-serif;color:var(--mut)}
+.step b{display:block;font:600 15.5px/1.25 Sora,system-ui,sans-serif;margin:4px 0 6px}
+.step p{font-size:13.5px;color:var(--mut);margin:0}
+.step.ok{border-color:rgba(64,224,208,.55);box-shadow:0 0 30px -12px rgba(64,224,208,.7)}
+.step.ok .n{color:var(--tq)}
+.step.mid{border-color:rgba(244,185,66,.5)}.step.mid .n{color:var(--gold)}
+.step.miss{border-style:dashed;border-color:rgba(240,100,100,.45)}.step.miss .n{color:var(--red)}
+@keyframes stepIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.branch{display:grid;gap:10px}
+.brow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:start;position:relative}
+.brow>span{font-size:13px;color:var(--mut);padding-top:6px}
+@media(max-width:640px){.brow{grid-template-columns:1fr}}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12.5px;padding:5px 10px;border-radius:99px;border:1px solid rgba(255,255,255,.08);color:#6f83a3}
+.pill.adecuada{border-color:var(--tq);color:var(--ink);background:rgba(64,224,208,.14);box-shadow:0 0 16px -4px rgba(64,224,208,.7)}
+.pill.insuficiente{border-color:var(--gold);color:var(--ink);background:rgba(244,185,66,.14)}
+.pill.riesgosa{border-color:var(--red);color:var(--ink);background:rgba(240,100,100,.14)}
+.list{margin:0;padding-left:20px}.list li{margin-bottom:6px}
+.stampx{display:inline-block;transform:rotate(-8deg);border:3px solid var(--tq);color:var(--tq);font:800 16px Sora,system-ui,sans-serif;letter-spacing:.14em;padding:4px 12px;border-radius:8px;animation:stamp .5s .6s cubic-bezier(.2,1.6,.4,1) both}
+/* overlay */
+#ovl{position:fixed;inset:0;z-index:55;display:none;place-items:center;padding:16px;background:rgba(4,8,16,.8);backdrop-filter:blur(8px)}
+#ovl.open{display:grid;animation:fade .3s both}
+.ubox{width:min(460px,100%);text-align:center;padding:34px 26px;border-radius:22px;background:linear-gradient(170deg,#183257,#0e1c33);border:1px solid rgba(244,185,66,.4);box-shadow:0 0 80px -20px rgba(244,185,66,.5);animation:pop .6s cubic-bezier(.2,1.5,.4,1) both}
+.badge{width:110px;height:110px;margin:0 auto 16px;border-radius:30px;display:grid;place-items:center;background:conic-gradient(from 0deg,var(--gold),var(--tq),var(--blue),var(--gold));animation:spinIn 1s cubic-bezier(.2,1.2,.4,1) both;position:relative}
+.badge::after{content:"";position:absolute;inset:4px;border-radius:26px;background:#10213a}
+.badge svg{position:relative;z-index:1;width:52px;height:52px}
+@keyframes spinIn{from{transform:rotate(-180deg) scale(.3);opacity:0}to{transform:none;opacity:1}}
+.spark{position:fixed;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:56;animation:spark 1.2s ease-out forwards}
+@keyframes spark{to{transform:translate(var(--x),var(--y)) scale(.2);opacity:0}}
+/* design thinking */
+.dt{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;position:relative}
+@media(max-width:820px){.dt{grid-template-columns:1fr}}
+.ph{text-align:left;padding:16px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(11,17,32,.45);min-height:132px;position:relative;transition:all .3s}
+.ph:hover{border-color:var(--blue)}
+.ph .n{font:800 30px Sora,system-ui,sans-serif;color:#2a4466}
+.ph b{display:block;font:700 15px Sora,system-ui,sans-serif;letter-spacing:.06em;margin:2px 0 6px}
+.ph span{font-size:13px;color:var(--mut);display:block;line-height:1.4}
+.ph.sel{background:rgba(76,169,255,.1);border-color:var(--blue)}
+.ph.star{border-color:var(--gold);background:linear-gradient(170deg,rgba(244,185,66,.16),rgba(11,17,32,.5));box-shadow:0 0 40px -12px rgba(244,185,66,.6);transform:translateY(-6px)}
+.ph.star .n{color:var(--gold)}
+.ph.star::after{content:"Estamos aquí";position:absolute;top:-11px;right:12px;font-size:11.5px;font-weight:700;color:#1a1200;background:var(--gold);padding:2px 9px;border-radius:99px}
+.ph.star.sel{box-shadow:0 0 0 2px var(--gold),0 0 40px -12px rgba(244,185,66,.6)}
+.hbar{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:4px 12px;align-items:center;margin-bottom:14px}
+.hbar em{font:700 18px Sora,system-ui,sans-serif;font-style:normal;text-align:right}
+.hbar .bar{grid-column:1/-1;height:12px}
+table.t{width:100%;border-collapse:collapse;font-size:14.5px}
+table.t th,table.t td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t th{color:var(--mut);font-weight:600;font-size:13px}
+table.t td.c{text-align:center}
+.scroll{overflow-x:auto}
+.tree{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media(max-width:760px){.tree{grid-template-columns:1fr}}
+.tree>div{padding:16px;border-radius:14px;border:1px solid var(--line);background:rgba(11,17,32,.4)}
+.ver{display:grid;gap:12px}
+.ver>div{display:grid;grid-template-columns:90px minmax(0,1fr);gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:rgba(11,17,32,.4)}
+.ver b.v{font:700 15px Sora,system-ui,sans-serif;color:var(--tq)}
+/* matrix */
+.crit{display:grid;gap:12px}
+.crit .top2{display:flex;gap:14px;align-items:center}
+.gauge{width:84px;height:84px;flex:none;position:relative}
+.gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
+.gauge circle{fill:none;stroke-width:8}
+.gauge b{position:absolute;inset:0;display:grid;place-items:center;font:700 18px Sora,system-ui,sans-serif}
+.chk{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:none;border:0;padding:7px 4px;border-radius:8px;font-size:14.5px;line-height:1.4;min-height:40px}
+.chk:hover{background:rgba(76,169,255,.06)}
+.chk i{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid #3a5579;display:grid;place-items:center;margin-top:1px;transition:all .25s}
+.chk.on i{background:var(--tq);border-color:var(--tq)}
+.chk.on i::after{content:"";width:6px;height:11px;border:solid #04121f;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.chk.auto{cursor:default}
+.chk a{font-size:12.5px;margin-left:4px}
+/* survey */
+.lik{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 18px}
+.lik button{min-width:48px;min-height:48px;border-radius:12px;border:1px solid var(--line);background:rgba(11,17,32,.45);font:700 16px Sora,system-ui,sans-serif;transition:all .2s}
+.lik button:hover{border-color:var(--blue)}
+.lik button.on{background:var(--tq);color:#04121f;border-color:var(--tq);transform:scale(1.06)}
+.demo-flag{position:relative}
+.demo-flag::before{content:"DATOS DE DEMOSTRACIÓN · FICTICIOS";position:absolute;top:-12px;left:16px;background:var(--gold);color:#1a1200;font:700 11.5px Inter;padding:3px 10px;border-radius:99px;z-index:1}
+.demo-flag{border-color:rgba(244,185,66,.6)!important;background-image:repeating-linear-gradient(135deg,rgba(244,185,66,.04) 0 14px,transparent 14px 28px)}
+/* chain */
+.chain{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;row-gap:16px}
+.chain .k{padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:rgba(11,17,32,.5);font:700 13.5px Sora,system-ui,sans-serif;letter-spacing:.08em;opacity:0;animation:chainIn .5s forwards}
+.chain .a{width:34px;height:2px;background:linear-gradient(90deg,var(--blue),var(--tq));opacity:0;animation:chainIn .4s forwards;position:relative}
+.chain .a::after{content:"";position:absolute;right:-2px;top:-4px;border:5px solid transparent;border-left:7px solid var(--tq)}
+@keyframes chainIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
+.chain .k.hi{border-color:var(--gold);color:var(--gold);box-shadow:0 0 24px -6px rgba(244,185,66,.7)}
+.closing{position:relative;height:190px;perspective:1200px;margin:10px auto 0;max-width:420px}
+.closing .f{position:absolute;inset:0;border-radius:10px 18px 18px 18px;background:linear-gradient(160deg,#1d3a5e,#122640);border:1px solid rgba(76,169,255,.35)}
+.closing .lid{position:absolute;inset:0;border-radius:10px 18px 18px 18px;background:linear-gradient(160deg,#2a5a8f,#173459);border:1px solid rgba(76,169,255,.5);transform-origin:top;transform:rotateX(-100deg);opacity:0;animation:lidClose 1.4s .4s cubic-bezier(.6,.1,.2,1) forwards;display:grid;place-items:center;font:700 18px Sora,system-ui,sans-serif;letter-spacing:.24em}
+@keyframes lidClose{to{transform:none;opacity:1}}
+.closing .stamp{animation-delay:1.9s;right:10%;bottom:16%}
+/* tour */
+#tour{position:fixed;right:16px;bottom:16px;z-index:45;width:min(380px,calc(100% - 32px));display:none}
+#tour.open{display:block;animation:fadeUp .4s both}
+#tour .panel{border-color:rgba(244,185,66,.5);background:rgba(16,30,52,.95)}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:70;display:grid;gap:8px;pointer-events:none}
+.toast{padding:12px 18px;border-radius:12px;background:#16294a;border:1px solid var(--line);box-shadow:0 20px 40px -16px #000;font-size:14.5px;animation:fadeUp .3s both}
+.confirm{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(4,8,16,.7);padding:16px}
+/* reduced motion */
+.rm *,.rm *::before,.rm *::after{animation-duration:.001s!important;animation-delay:0s!important;transition-duration:.001s!important}
+.rm .cover{display:none}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gr" x1="0" x2="1"><stop offset="0" stop-color="#4CA9FF"/><stop offset="1" stop-color="#40E0D0"/></linearGradient><linearGradient id="gg" x1="0" x2="1"><stop offset="0" stop-color="#F4B942"/><stop offset="1" stop-color="#40E0D0"/></linearGradient></defs></svg>
+<header class="top" id="top" hidden></header>
+<main id="app"></main>
+<div id="modal" role="dialog" aria-modal="true" aria-label="Documento de evidencia"></div>
+<div id="ovl" role="dialog" aria-modal="true" aria-label="Expediente analizado"></div>
+<div id="tour" aria-live="polite"></div>
+<div id="toast" aria-live="polite"></div>
+<script>
+/* ===================== CONFIGURACIÓN DE FIREBASE =====================
+   Pega aquí los datos de tu app web de Firebase (Configuración del proyecto → Tus apps → SDK).
+   Si apiKey queda vacío, RUTA funciona igual y guarda solo en este navegador.
+   Solo se usa Cloud Firestore: no se usa Firebase Storage. */
+window.RUTA_FIREBASE = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  appId: ""
+};
+</script>
+<script>
+{
+/* ============ DATOS: RUTA DE 8 ETAPAS ============ */
+const STEPS=['Recepción del caso','Reconstrucción de hechos','Revisión de evidencias','Identificación del problema','Información faltante','Análisis de alternativas','Decisión fundamentada','Ruta de orientación'];
+const STEP_TIP=['Escuchar el relato completo antes de concluir.','Separa hechos relevantes, información faltante y datos accesorios.','Abre y contrasta todos los documentos antes de decidir.','Delimita el problema con base en hechos verificados, no en la calificación más llamativa.','Pregunta lo que el usuario no sabe que es importante: eso define la orientación.','Compara alternativas proporcionales antes de elegir la más fuerte.','Cada decisión necesita un porqué coherente con los hechos.','Ordena las actuaciones: primero verificar, luego actuar, después escalar.'];
+const DIMS=[['hechos','Análisis de los hechos',20],['problema','Identificación del problema',20],['evidencias','Revisión de evidencias',20],['ruta','Construcción de la ruta',25],['argumentacion','Argumentación de decisiones',15]];
+const Q={adecuada:1,insuficiente:.45,riesgosa:0};
+const VLBL={adecuada:'Decisión adecuada',insuficiente:'Decisión insuficiente',riesgosa:'Decisión riesgosa'};
+const BIN={r:'Hecho relevante',f:'Falta información',n:'No relevante'};
+
+/* ============ DATOS: EXPEDIENTES ============ */
+const CASES=[
+{id:'c1',num:'EXP-001',title:'La entrega que nunca llegó',area:'Civil · Consumidor',diff:'Básico',dots:1,time:'15–20 min',badge:'Insignia Consumidor',
+desc:'Una estudiante pagó un portátil que nunca fue entregado. La tienda aplaza la entrega y dejó de responder con claridad.',
+goal:'Identificar hechos relevantes, información faltante y la necesidad de la usuaria antes de recomendar una actuación.',
+client:{n:'Laura Méndez',i:'LM',r:'Estudiante y trabajadora independiente, 22 años'},
+intro:'Laura llega al consultorio con el celular en la mano. “Pagué un portátil completo el 2 de septiembre. Me dijeron que llegaba en cinco días. Ya es octubre, me cambian la fecha cada semana y ahora ni me contestan. Lo necesito para estudiar y trabajar.” Sobre la mesa deja capturas, un comprobante y un correo.',
+evid:[
+{t:'Comprobante de pago',k:'Transferencia bancaria',mono:1,h:`<table><tr><th colspan="2">BANCO ANDINO · Comprobante de transferencia</th></tr><tr><td>Fecha y hora</td><td class="n">02/09/2026 · 10:14 a. m.</td></tr><tr><td>Referencia</td><td class="n">884120931</td></tr><tr><td>Ordenante</td><td>Laura Méndez Ruiz</td></tr><tr><td>Beneficiario</td><td>TecnoNova Store S.A.S.</td></tr><tr><td>Concepto</td><td><span class="hl">Pedido TN-20931</span></td></tr><tr><td>Valor</td><td class="n"><b>$3.200.000 COP</b></td></tr><tr><td>Estado</td><td><b>APROBADA</b></td></tr></table><div class="clue">Pista del investigador: el concepto del pago permite vincularlo con un pedido concreto.</div>`},
+{t:'Confirmación de compra',k:'Correo electrónico',h:`<div class="mail"><div class="h">De: pedidos@tecnonova.example<br>Para: Laura Méndez<br>Asunto: Tu pedido TN-20931 fue confirmado · 02/09/2026</div><p>Hola, Laura. Recibimos tu pago.</p><table><tr><td>Producto</td><td>Portátil Lumen 14 (16 GB RAM, 512 GB SSD) × 1</td></tr><tr><td>Total pagado</td><td class="n">$3.200.000</td></tr><tr><td>Entrega estimada</td><td><span class="hl">3 a 5 días hábiles</span></td></tr><tr><td>Dirección</td><td>Bogotá (dato anonimizado)</td></tr></table><p style="margin-top:12px"><span class="hl">Tu factura electrónica será enviada al momento del despacho.</span></p></div><div class="clue">Pista: si el producto nunca se despachó, ¿existe factura? Es información por confirmar.</div>`},
+{t:'Conversación con el vendedor',k:'Chat de mensajería',h:`<div class="chat"><span class="d">09/09/2026</span><p class="b">Hola, ¿cuándo llega mi pedido TN-20931?<small>Laura</small></p><p class="a">Está en alistamiento, pronto sale.<small>TecnoNova</small></p><span class="d">16/09/2026</span><p class="b">Ya pasó el plazo y no ha llegado.<small>Laura</small></p><p class="a">Tuvimos un problema con la transportadora. <span class="hl">Nueva fecha: 23 de septiembre.</span><small>TecnoNova</small></p><span class="d">24/09/2026</span><p class="b">No llegó nada.<small>Laura</small></p><p class="a">Inventario retrasado por el proveedor. <span class="hl">Máximo el 3 de octubre.</span><small>TecnoNova</small></p><span class="d">10/10/2026</span><p class="b">¿Qué pasó? Necesito el equipo para trabajar.<small>Laura</small></p><p class="a">Su pedido está en proceso, agradecemos su paciencia.<small>TecnoNova</small></p><span class="d">14/10/2026</span><p class="b">Si no lo entregan esta semana, quiero que me devuelvan el dinero.<small>Laura · visto, sin respuesta</small></p></div><div class="clue">Pista: los mensajes muestran aplazamientos, pero ¿son un reclamo formal por el canal que la tienda indica?</div>`},
+{t:'Condiciones de entrega',k:'Términos de la tienda (extracto)',h:`<h5>3. Entregas</h5><p>3.1 Los tiempos de entrega son estimados y se cuentan desde la confirmación del pago.</p><p>3.2 Los plazos podrán variar por causas ajenas a la tienda, lo cual será informado oportunamente al cliente.</p><p>3.4 <span class="hl">Si el producto no se entrega en el plazo informado, el cliente podrá solicitar la entrega o la devolución del dinero</span> a través del canal de reclamos.</p><h5>5. Peticiones, quejas y reclamos</h5><p>5.1 <span class="hl">Canal de reclamos: reclamos@tecnonova.example</span> · respuesta en máximo 15 días hábiles.</p><div class="clue">Pista: no consta que Laura haya usado el canal de reclamos. Y la cláusula 3.4 obliga a definir qué pretende: el producto o el dinero.</div>`},
+{t:'Línea de tiempo de los hechos',k:'Reconstrucción preliminar',h:`<ul class="tl"><li><b>02/09</b><br>Pago total y confirmación del pedido.</li><li><b>05–09/09</b><br>Vence el plazo estimado de 3 a 5 días hábiles.</li><li><b>16/09</b><br>Primer aplazamiento: falla de transportadora.</li><li><b>24/09</b><br>Segundo aplazamiento: inventario retrasado.</li><li><b>03/10</b><br>Vence la “fecha máxima” prometida.</li><li><b>10/10</b><br>Respuesta genérica de la tienda.</li><li><b>14/10</b><br>Laura pide devolución por chat. Sin respuesta.</li></ul><div class="clue">Pista: hay al menos tres aplazamientos. Falta saber si existió reclamo escrito formal.</div>`}],
+facts:[
+{t:'Laura pagó el valor total del portátil el 2 de septiembre.',b:'r'},
+{t:'La tienda informó una entrega estimada de 3 a 5 días hábiles.',b:'r'},
+{t:'¿Laura presentó un reclamo formal y escrito por el canal de la tienda?',b:'f'},
+{t:'La tienda tiene muchos seguidores en redes sociales.',b:'n'},
+{t:'La entrega se aplazó al menos tres veces sin cumplirse.',b:'r'},
+{t:'¿Existe factura electrónica o solo la confirmación del pedido?',b:'f'},
+{t:'Laura necesita el equipo para estudiar y trabajar.',b:'r'},
+{t:'¿Qué pretende Laura: recibir el producto o la devolución del dinero?',b:'f'}],
+stages:[
+{q:'¿Qué revisarías primero?',w:{evidencias:6,problema:2,ruta:2},intro:'Tienes los documentos sobre la mesa y a Laura esperando una respuesta. Antes de cualquier actuación, decides por dónde empezar.',
+opts:[
+{s:'Contrastar pago y pedido',l:'Contrastar el comprobante de pago con la confirmación del pedido para verificar que corresponden a la misma compra.',v:'adecuada',c:'El número TN-20931 aparece en ambos documentos: el vínculo entre pago y compra queda soportado. Además notas que la factura depende del despacho, que nunca ocurrió.',f:'Partir de los soportes del vínculo contractual da solidez a todo lo que sigue y revela información faltante (la factura).'},
+{s:'Revisar reseñas en redes',l:'Leer las reseñas de la tienda en redes sociales para saber si es confiable.',v:'insuficiente',c:'Encuentras quejas de otros clientes. Te da contexto, pero ninguna reseña prueba lo que le pasó a Laura.',f:'El contexto puede orientar, pero no reemplaza la revisión de las pruebas del propio caso.'},
+{s:'Redactar demanda de inmediato',l:'Empezar a redactar de inmediato una demanda con lo que cuenta Laura.',v:'riesgosa',flag:'precip',c:'A mitad del borrador notas que no tienes el número de pedido, ni las fechas exactas, ni sabes qué pretende Laura. El documento queda sin soporte.',f:'Actuar antes de verificar soportes y pretensiones lleva a escritos débiles y puede escoger una vía que no corresponde.'},
+{s:'Leer condiciones de entrega',l:'Revisar las condiciones de entrega para saber qué plazo se informó y qué canal de reclamo existe.',v:'adecuada',c:'La cláusula 3.4 prevé la entrega o la devolución si se incumple el plazo, y existe un canal formal de reclamos que Laura no parece haber usado.',f:'Conocer lo pactado delimita qué puede exigirse y por qué canal; es un punto de partida sólido.'}],
+just:[{t:'Toda actuación debe partir de soportes verificables de la compra y de lo pactado.',q:1},{t:'Así me hago una idea general del caso antes de profundizar.',q:.5},{t:'Es lo más rápido para darle una respuesta inmediata a la usuaria.',q:0}]},
+{q:'¿Qué información necesitas confirmar?',w:{evidencias:4,problema:6,ruta:2},intro:'Con los primeros documentos revisados, aparecen vacíos. Decides qué confirmar con Laura.',introIf:[{f:'precip',t:'Dejaste el borrador de demanda a medias: sin datos confirmados no puedes avanzar. Toca volver a la información básica.'}],
+opts:[
+{s:'Reclamo previo y respuesta',l:'Si Laura ya presentó un reclamo directo y escrito, y si conserva alguna respuesta.',v:'adecuada',c:'Laura confirma que solo escribió por chat: nunca usó el canal formal. Ese dato cambia la actuación inicial.',f:'Saber si hubo reclamo previo determina el primer paso y qué constancias existen.'},
+{s:'Modelo del procesador',l:'El modelo exacto del procesador del portátil.',v:'insuficiente',c:'Laura no lo recuerda y no cambia nada del análisis. Pierdes tiempo de la entrevista.',f:'No todo dato del producto es jurídicamente relevante; la información a confirmar debe servir a la decisión.'},
+{s:'Nada más: demandar ya',l:'Nada más: las pruebas ya son suficientes para iniciar un proceso.',v:'riesgosa',flag:'precip',c:'Sin saber si hubo reclamo ni qué pretende Laura, cualquier actuación arranca con vacíos importantes.',f:'Dar por completa la información sin verificar es una de las causas más comunes de orientaciones fallidas.'},
+{s:'Pretensión y perjuicio',l:'Qué pretende Laura (entrega o devolución) y cómo la afecta no tener el equipo.',v:'adecuada',c:'Laura prefiere la devolución del dinero: ya consiguió un equipo prestado, pero debe devolverlo pronto.',f:'La pretensión define el objeto de cualquier reclamo; la afectación ayuda a valorar la urgencia.'}],
+just:[{t:'La información faltante determina qué actuación procede y qué se puede pedir.',q:1},{t:'Entre más datos tenga, mejor, aunque no sepa para qué sirven.',q:.5},{t:'Prefiero avanzar y completar los datos sobre la marcha.',q:0}]},
+{q:'¿Cómo delimitarías el problema?',w:{problema:10,ruta:3},intro:'Es momento de nombrar el problema. La forma en que lo delimites orienta toda la ruta.',introIf:[{f:'precip',t:'Tu impulso inicial de demandar sigue pesando. Revisa si la calificación que elijas está sostenida por los hechos.'}],
+opts:[
+{s:'Incumplimiento de entrega',l:'Incumplimiento en la entrega de un producto pagado en una venta a distancia, con posible afectación de derechos como consumidora.',v:'adecuada',c:'La delimitación encaja con todos los documentos: pago probado, plazo informado, aplazamientos y falta de entrega.',f:'Una delimitación precisa y sostenida en hechos verificados permite identificar las normas y alternativas a revisar.'},
+{s:'Estafa penal',l:'Una estafa cometida por la tienda.',v:'riesgosa',c:'No tienes elementos que indiquen engaño intencional desde el inicio. La calificación penal desvía el caso y puede frustrar la solución que Laura busca.',f:'Calificar con la figura más grave sin elementos suficientes es precipitado y cambia por completo la ruta.'},
+{s:'Retraso que debe esperarse',l:'Un simple retraso logístico: hay que esperar.',v:'insuficiente',c:'Laura se va sin una ruta. Pasan otras dos semanas sin noticias.',f:'Minimizar el problema ignora que el plazo informado venció hace más de un mes y que existen alternativas.'},
+{s:'Culpa de la transportadora',l:'Un problema de la transportadora, no de la tienda.',v:'insuficiente',c:'Laura nunca contrató con la transportadora. Descartas a la tienda sin analizar quién responde frente a la consumidora.',f:'La relación de consumo se dio con la tienda; descartarla sin análisis es prematuro.'}],
+just:[{t:'Delimitar con base en hechos probados evita calificaciones precipitadas.',q:1},{t:'Es la forma en que la usuaria describe lo que le pasó.',q:.5},{t:'Es la calificación que suena más fuerte y presiona más.',q:0}]},
+{q:'¿Qué actuación inicial evaluarías?',w:{problema:2,ruta:8},intro:'Ya sabes qué pasó, qué falta y qué quiere Laura. Ahora eliges la primera actuación.',introIf:[{f:'precip',t:'Varias de tus decisiones fueron apresuradas. Esta es la oportunidad de elegir una actuación proporcional.'}],
+opts:[
+{s:'Reclamo directo documentado',l:'Orientar un reclamo directo y escrito ante la tienda, por el canal formal, con la pretensión clara, los soportes anexos y constancia de envío.',v:'adecuada',c:'Laura envía el reclamo con el comprobante, la confirmación y los chats. Queda constancia y un plazo de respuesta que permite escalar si no contestan.',f:'Es proporcional, deja prueba y abre la puerta a otras vías si no hay respuesta satisfactoria.'},
+{s:'Exponer en redes',l:'Publicar el caso en redes sociales para presionar a la tienda.',v:'riesgosa',c:'La tienda bloquea a Laura y no queda ninguna constancia formal. La presión pública no es una actuación jurídica.',f:'La exposición pública no reemplaza un reclamo y puede generar nuevos conflictos.'},
+{s:'Esperar un mes',l:'Recomendar esperar un mes más antes de hacer algo.',v:'insuficiente',c:'Laura sigue sin equipo ni dinero, y el tiempo corre en su contra.',f:'Esperar sin una actuación ni constancia no protege los intereses de la usuaria.'},
+{s:'Ir a juicio sin reclamo',l:'Acudir directamente a la vía judicial sin reclamo previo ni revisar requisitos.',v:'riesgosa',c:'Al revisar, descubres que debes verificar requisitos previos y que no tienes constancia de haber reclamado.',f:'Escalar sin revisar requisitos ni agotar el reclamo directo puede hacer fracasar la actuación.'}],
+just:[{t:'Es proporcional, deja constancia y permite escalar si no hay respuesta.',q:1},{t:'Es la opción que genera una reacción más rápida de la tienda.',q:.5},{t:'Me evita tener que revisar requisitos y plazos.',q:0}]}],
+order:{q:'¿Cómo organizarías la ruta de actuación?',items:['Recibir el relato y los soportes de Laura','Verificar pago, pedido y condiciones pactadas','Identificar la información faltante (reclamo previo, factura, pretensión)','Delimitar el problema: incumplimiento en una venta a distancia','Presentar un reclamo directo, escrito y documentado','Si no hay respuesta satisfactoria, evaluar la vía de protección al consumidor que proceda']},
+refs:'Normativa a verificar: régimen vigente de protección al consumidor (en Colombia, Ley 1480 de 2011) y reglas sobre ventas a distancia.'},
+
+{id:'c2',num:'EXP-002',title:'Un último día sin respuestas',area:'Derecho laboral',diff:'Intermedio',dots:2,time:'15–20 min',badge:'Insignia Laboral',
+desc:'Un trabajador recibió un mensaje que le indicaba no volver. Tiene pagos pendientes y no sabe qué documentos reunir.',
+goal:'Reconstruir los hechos, identificar qué debe verificarse de la relación laboral, detectar la información faltante y proponer una ruta inicial.',
+client:{n:'Andrés Rojas',i:'AR',r:'Auxiliar de caja en un minimercado, 27 años'},
+intro:'Andrés habla rápido y con rabia contenida. “Trabajé ocho meses en el minimercado. El domingo en la noche me escribieron que no volviera. Me deben la última quincena. Nunca firmé nada y el dueño dice que yo era por días.” Trae el celular y una hoja con horarios escritos a mano.',
+evid:[
+{t:'Mensaje de terminación',k:'Chat de mensajería',h:`<div class="chat"><span class="d">Domingo 28/09/2026 · 9:42 p. m.</span><p class="a">Andrés, a partir de mañana no tiene que volver. Ya no lo necesitamos. <span class="hl">Pase el viernes por lo suyo.</span><small>Don Hernán · Minimercado La Esquina</small></p><p class="b">¿Por qué? ¿Y lo que me deben?<small>Andrés · visto, sin respuesta</small></p></div><div class="clue">Pista: la terminación se comunicó por mensaje y sin motivo. ¿Qué significa “lo suyo”?</div>`},
+{t:'Registro de pagos recibidos',k:'Billetera digital (resumen)',mono:1,h:`<table><tr><th>Fecha</th><th>Concepto</th><th>Valor</th></tr><tr><td>15/02 … 15/06</td><td>Quincena (9 pagos)</td><td class="n">$650.000 c/u</td></tr><tr><td>30/06</td><td>Quincena</td><td class="n"><span class="hl">$500.000</span></td></tr><tr><td>15/07 … 15/09</td><td>Quincena (5 pagos)</td><td class="n">$650.000 c/u</td></tr><tr><td>30/09</td><td>Quincena</td><td class="n"><span class="hl">Sin pago</span></td></tr></table><div class="clue">Pista: pagos quincenales constantes durante meses, uno incompleto y uno pendiente. ¿Cuál era el salario pactado?</div>`},
+{t:'Horarios de trabajo',k:'Planilla manuscrita (transcripción)',mono:1,h:`<table><tr><th>Día</th><th>Turno</th></tr><tr><td>Lunes a sábado</td><td><span class="hl">7:00 a. m. – 7:00 p. m.</span> · almuerzo 30 min</td></tr><tr><td>Domingos alternos</td><td>8:00 a. m. – 2:00 p. m.</td></tr><tr><td colspan="2">“Turnos asignados por Don Hernán. Cambios solo con su permiso.”</td></tr></table><div class="clue">Pista: horario fijado por el empleador y jornada extensa. Son aspectos a verificar (subordinación, jornada, posibles horas extra).</div>`},
+{t:'Conversaciones con el empleador',k:'Chat de mensajería',h:`<div class="chat"><span class="d">03/02/2026</span><p class="a">Empieza mañana a las 7. <span class="hl">Se le paga quincenal.</span><small>Don Hernán</small></p><span class="d">20/05/2026</span><p class="a">Hoy se queda hasta las 8, que llega mercancía.<small>Don Hernán</small></p><span class="d">01/07/2026</span><p class="b">Don Hernán, faltaron 150 de la quincena.<small>Andrés</small></p><p class="a">Después le completo.<small>Don Hernán</small></p><span class="d">02/10/2026</span><p class="b">¿Me va a pagar la liquidación?<small>Andrés</small></p><p class="a"><span class="hl">Usted era por días, aquí no hay contrato.</span> Venga y le doy lo de la última semana.<small>Don Hernán</small></p></div><div class="clue">Pista: el empleador niega la existencia de contrato, pero sus propios mensajes hablan de órdenes, horario y pago quincenal.</div>`},
+{t:'Relato cronológico del trabajador',k:'Declaración escrita de Andrés',h:`<p>“Empecé el <b>3 de febrero</b>. Atendía la caja, recibía mercancía y organizaba estantes. Don Hernán me decía qué hacer y a qué hora llegar.</p><p>Nunca firmé nada. <span class="hl">No sé si me afiliaron a salud o pensión</span>; cuando me enfermé en mayo fui a una cita por mi cuenta.</p><p>Nunca me pagaron prima ni vacaciones. El 28 de septiembre me escribieron que no volviera. <span class="hl">Me deben la última quincena</span> y los $150.000 de junio.</p><p>Una compañera, Yésica, trabajó conmigo todo ese tiempo y vio todo.”</p><div class="clue">Pista: aparecen datos por verificar (afiliación, prima, vacaciones) y una posible testigo.</div>`}],
+facts:[
+{t:'Andrés prestó servicios personalmente en el minimercado durante unos ocho meses.',b:'r'},
+{t:'Recibía pagos quincenales por su trabajo.',b:'r'},
+{t:'¿Hubo contrato escrito o verbal y en qué términos?',b:'f'},
+{t:'El minimercado vende principalmente productos de panadería.',b:'n'},
+{t:'Cumplía un horario fijado por el empleador.',b:'r'},
+{t:'¿Estuvo afiliado a seguridad social (salud, pensión, riesgos laborales)?',b:'f'},
+{t:'La terminación se comunicó por mensaje, sin indicar motivo.',b:'r'},
+{t:'¿Cuál era el salario pactado y qué pagos están pendientes exactamente?',b:'f'}],
+stages:[
+{q:'¿Qué hechos deben aclararse?',w:{problema:6,evidencias:2,ruta:2},intro:'Andrés quiere saber “cuánto le deben”. Antes de responder, decides qué hechos aclarar.',
+opts:[
+{s:'Condiciones reales de la relación',l:'Las condiciones reales de la relación: fechas de inicio y fin, funciones, horario, salario y quién daba las órdenes.',v:'adecuada',c:'Andrés detalla funciones, horario fijo y órdenes de Don Hernán. Aparece una imagen clara de cómo funcionaba la relación.',f:'Las condiciones reales, más allá de cómo las nombre el empleador, son la base para verificar si hubo relación laboral.'},
+{s:'Motivo personal del despido',l:'Por qué cree Andrés que lo despidieron, para saber si fue algo personal.',v:'insuficiente',c:'Andrés cree que fue por pedir el pago de junio. Es un dato útil, pero aún no sabes cómo era la relación.',f:'El motivo puede importar, pero primero hay que reconstruir los elementos de la relación.'},
+{s:'Ninguno: despido injusto',l:'Ninguno: el mensaje basta para afirmar que fue un despido injusto.',v:'riesgosa',flag:'precip',c:'Le dices a Andrés que “ganó”. Minutos después notas que ni siquiera sabes cuál era su salario.',f:'Concluir antes de reconstruir los hechos genera expectativas que el caso puede no sostener.'},
+{s:'Cuánto quiere recibir',l:'Cuánto dinero quiere recibir Andrés.',v:'insuficiente',c:'Andrés dice una cifra al azar. No tienes cómo saber si es razonable.',f:'La expectativa económica no es un hecho del caso; los montos dependen de verificar la relación y los pagos.'}],
+just:[{t:'Las condiciones reales de la relación determinan qué derechos deben verificarse.',q:1},{t:'Entender cómo se siente Andrés ayuda a orientarlo.',q:.5},{t:'El mensaje de terminación ya lo dice todo.',q:0}]},
+{q:'¿Qué documentos son importantes?',w:{evidencias:8,ruta:2},intro:'Andrés tiene información dispersa en su celular y en papeles. Decides qué reunir.',introIf:[{f:'precip',t:'Calificaste el caso como “despido injusto” desde el inicio. Al revisar, notas que te faltan casi todos los soportes.'}],
+opts:[
+{s:'Pagos, horarios, chats y testigos',l:'Registro de pagos, horarios, mensajes con el empleador y posibles testigos, organizados cronológicamente.',v:'adecuada',flag:'org',c:'Con la cronología armada se ven pagos quincenales constantes, órdenes de horario y una testigo disponible: indicios importantes.',f:'Organizar las pruebas por fecha permite sustentar cada afirmación y detectar vacíos.'},
+{s:'Solo el mensaje',l:'Solo el mensaje de terminación.',v:'riesgosa',flag:'omit',c:'Sin pagos ni horarios no puedes sustentar cómo era la relación. El análisis queda incompleto.',f:'Omitir pruebas disponibles debilita cualquier reclamación posterior.'},
+{s:'Carta de un cliente',l:'Una carta de recomendación de un cliente del minimercado.',v:'insuficiente',c:'El cliente confirma que Andrés atendía la caja, pero no aporta nada sobre horario, órdenes o pagos.',f:'Puede servir como apoyo, pero no es una prueba central de las condiciones de la relación.'},
+{s:'Certificados de estudio',l:'Los certificados de estudio de Andrés.',v:'insuficiente',c:'No aportan a la reconstrucción de la relación laboral.',f:'Los documentos deben elegirse según lo que se necesita probar.'}],
+just:[{t:'Organizar las pruebas por fecha permite sustentar cada afirmación.',q:1},{t:'Cualquier documento puede servir más adelante.',q:.5},{t:'Reunir pruebas retrasa la orientación.',q:0}]},
+{q:'¿Qué preguntas realizarías antes de orientar?',w:{problema:4,ruta:5},intro:'Antes de orientar, tienes la oportunidad de preguntar lo que Andrés no sabe que es importante.',introIf:[{f:'omit',t:'Solo tienes el mensaje de terminación. Las preguntas que hagas ahora son clave para recuperar información.'},{f:'org',t:'Con la cronología organizada, ya ves qué falta. Tus preguntas pueden ir directo a los vacíos.'}],
+opts:[
+{s:'Preguntas abiertas y concretas',l:'¿Firmó algún documento? ¿Le pagaron prima, vacaciones o seguridad social? ¿Recibió liquidación? ¿Alguien puede confirmar los hechos?',v:'adecuada',c:'Andrés recuerda que nunca vio descuentos de salud ni pensión y que Yésica puede declarar. Surgen aspectos clave por verificar.',f:'Preguntas concretas revelan información decisiva que el usuario no sabe que importa.'},
+{s:'¿Quiere demandar ya?',l:'¿Quiere demandar ya mismo?',v:'insuficiente',c:'Andrés dice que sí, pero no sabe qué implica. La pregunta anticipa una ruta antes de tener la información.',f:'Una pregunta cerrada sobre la ruta llega antes de tiempo; primero hay que completar los hechos.'},
+{s:'¿Se llevaba bien con el jefe?',l:'¿Se llevaba bien con el jefe?',v:'insuficiente',c:'La respuesta es emocional y no aporta a los aspectos que debes verificar.',f:'No toda pregunta sobre la relación personal es jurídicamente útil.'},
+{s:'No preguntar para no incomodar',l:'No hacer más preguntas para no incomodarlo.',v:'riesgosa',c:'Orientas con información incompleta: nunca sabes lo de la seguridad social ni lo de la testigo.',f:'Evitar preguntas por incomodidad deja por fuera información que cambia la orientación.'}],
+just:[{t:'Preguntas abiertas y concretas revelan información que el usuario no sabe que es importante.',q:1},{t:'Preguntar lo básico es suficiente para empezar.',q:.5},{t:'Es mejor no preguntar demasiado para no incomodar.',q:0}]},
+{q:'¿Qué aspectos jurídicos deben verificarse?',w:{problema:10,ruta:6},intro:'Con los hechos y documentos claros, defines qué aspectos jurídicos debe revisar la orientación.',introIf:[{f:'precip',t:'Tu conclusión inicial fue apresurada. Esta decisión define si el análisis se corrige.'}],
+opts:[
+{s:'Relación, terminación y pagos',l:'Si existió contrato de trabajo (prestación personal, subordinación y salario), su modalidad, la forma de terminación y los pagos, prestaciones y afiliaciones pendientes.',v:'adecuada',c:'El análisis queda completo: primero la naturaleza de la relación, luego la terminación y después los pagos que pudieran estar pendientes.',f:'Verificar la existencia y modalidad de la relación es el presupuesto de cualquier reclamación de pagos.'},
+{s:'Solo el tono del mensaje',l:'Únicamente si el empleador fue grosero en el mensaje.',v:'insuficiente',c:'El tono no define los derechos de Andrés. El análisis queda en la superficie.',f:'La forma del mensaje puede ser un detalle, pero no el aspecto jurídico central.'},
+{s:'Calcular indemnización exacta',l:'Calcular de inmediato una indemnización exacta sin conocer el salario ni la modalidad del contrato.',v:'riesgosa',c:'Das una cifra que luego resulta imposible de sostener. Andrés queda con una expectativa equivocada.',f:'Calcular sin presupuestos verificados es precipitado y puede generar expectativas falsas.'},
+{s:'Aceptar que era por días',l:'Analizar a Andrés como trabajador independiente por días, como dice el empleador.',v:'insuficiente',c:'Aceptas la versión del empleador sin contrastarla con horarios, órdenes y pagos quincenales.',f:'La denominación que da una de las partes no reemplaza el análisis de las condiciones reales.'}],
+just:[{t:'Antes de hablar de pagos hay que verificar la naturaleza de la relación y cómo terminó.',q:1},{t:'Es lo que más le preocupa al trabajador.',q:.5},{t:'Un cálculo rápido impresiona y motiva al usuario.',q:0}]}],
+order:{q:'¿Qué ruta de orientación propondrías?',items:['Escuchar el relato y reconstruir la cronología de la relación','Reunir pagos, horarios, mensajes y posibles testigos','Verificar los elementos de la relación laboral y su modalidad','Identificar pagos, prestaciones y afiliaciones por confirmar','Orientar una solicitud escrita de información y liquidación al empleador','Evaluar la conciliación o la reclamación ante la autoridad competente, verificando plazos']},
+refs:'Normativa a verificar: régimen laboral vigente (en Colombia, Código Sustantivo del Trabajo) y plazos de prescripción aplicables.'},
+
+{id:'c3',num:'EXP-003',title:'Una obligación pendiente',area:'Derecho de familia',diff:'Intermedio–avanzado',dots:3,time:'20 min',badge:'Insignia Familia',sober:1,
+desc:'Una madre busca orientación porque el padre de su hijo dejó de contribuir regularmente a los gastos del niño.',
+goal:'Identificar necesidades prioritarias, organizar los hechos, detectar información faltante y explorar alternativas, con el interés superior del niño como eje.',
+client:{n:'Marcela Ríos',i:'MR',r:'Madre de Tomás, 7 años'},
+intro:'Marcela habla con calma, pero se nota cansada. “No quiero pelear con el papá de Tomás. Él lo ve cada quince días y el niño lo adora. Pero desde abril casi no aporta y yo ya no alcanzo con el colegio y el transporte. Solo quiero saber qué puedo hacer.”',
+sens:'Este expediente aborda una situación familiar. El centro del análisis es el interés superior del niño, no la confrontación entre sus padres.',
+evid:[
+{t:'Relato de la situación familiar',k:'Declaración de la madre',h:`<p>“Julián y yo nos separamos en 2024. Tomás tiene 7 años y vive conmigo.</p><p>Acordamos por mensaje que él daría <span class="hl">$400.000 al mes y la mitad de la matrícula</span>. Cumplió hasta marzo. Desde abril aporta poco o nada; dice que perdió el trabajo.</p><p>Él ve a Tomás cada quince días y el niño lo quiere mucho. No quiero que esto lo afecte. <span class="hl">Solo quiero que Tomás tenga lo que necesita.</span>”</p><div class="clue">Pista: la necesidad expresada es la estabilidad del niño. La relación entre padre e hijo es valiosa y debe protegerse.</div>`},
+{t:'Registro de gastos del menor',k:'Relación elaborada por la madre',mono:1,h:`<table><tr><th>Gasto mensual</th><th>Valor</th><th>Soporte</th></tr><tr><td>Pensión del colegio</td><td class="n">$280.000</td><td>Recibo</td></tr><tr><td>Alimentación</td><td class="n">$450.000</td><td><span class="hl">Estimado</span></td></tr><tr><td>Transporte escolar</td><td class="n">$120.000</td><td>Recibo</td></tr><tr><td>Control odontológico (marzo)</td><td class="n">$90.000</td><td>Factura</td></tr><tr><td>Uniformes (febrero)</td><td class="n">$210.000</td><td><span class="hl">Sin recibo</span></td></tr></table><h5>Aportes recibidos del padre (según la madre)</h5><table><tr><td>Enero – marzo</td><td class="n">$400.000 c/mes</td></tr><tr><td>Abril</td><td class="n">$150.000</td></tr><tr><td>Mayo – junio</td><td class="n">$0</td></tr><tr><td>Julio</td><td class="n">$100.000</td></tr><tr><td>Agosto – septiembre</td><td class="n">$200.000 c/mes</td></tr><tr><td>Octubre</td><td class="n">$0</td></tr></table><div class="clue">Pista: algunos gastos están soportados y otros son estimados o sin recibo. Esa diferencia importa.</div>`},
+{t:'Conversaciones entre los padres',k:'Chat de mensajería',h:`<div class="chat"><span class="d">05/04/2026</span><p class="b">Julián, este mes llegaron solo 150. ¿Pasó algo?<small>Marcela</small></p><p class="a">Me sacaron del trabajo. Estoy buscando. Hago lo que puedo.<small>Julián</small></p><span class="d">06/05/2026</span><p class="b">Entiendo, pero el transporte del niño hay que pagarlo.<small>Marcela</small></p><p class="a">Este mes no tengo nada, de verdad.<small>Julián</small></p><span class="d">02/08/2026</span><p class="a">Te mandé 200. <span class="hl">Estoy haciendo domicilios.</span><small>Julián</small></p><p class="b">Gracias. ¿Podemos hablar de cómo nos vamos a organizar?<small>Marcela</small></p><p class="a"><span class="hl">Sí, pero no tengo cómo dar 400.</span><small>Julián</small></p></div><div class="clue">Pista: hay disposición al diálogo de ambas partes y un cambio en la capacidad económica del padre que debe aclararse.</div>`},
+{t:'Información sobre acuerdos previos',k:'Mensaje de 2024 y nota',h:`<div class="chat"><span class="d">12/03/2024</span><p class="a">Quedamos así: yo doy 400 mensuales los 5 de cada mes y la mitad de la matrícula en enero.<small>Julián</small></p><p class="b">Listo.<small>Marcela</small></p></div><p style="margin-top:14px">Nota de la entrevista: <span class="hl">según la madre, no se firmó acta ni se acudió a conciliación.</span></p><div class="clue">Pista: el acuerdo existe, pero es informal. ¿Qué valor tiene y cómo podría formalizarse?</div>`},
+{t:'Lista de necesidades pendientes',k:'Elaborada por la madre',h:`<ul class="list"><li>Matrícula 2027 (enero): aprox. $350.000</li><li>Transporte escolar de octubre y noviembre</li><li>Zapatos escolares</li><li>Control odontológico pendiente</li><li>Útiles del segundo semestre</li></ul><div class="clue">Pista: hay necesidades presentes y continuas, y otras próximas. Priorizar es parte de la orientación.</div>`}],
+facts:[
+{t:'Existía un acuerdo informal de aporte mensual entre los padres.',b:'r'},
+{t:'Los aportes disminuyeron desde abril de 2026.',b:'r'},
+{t:'¿El acuerdo quedó en un acta de conciliación o documento formal?',b:'f'},
+{t:'Los padres se conocieron en la universidad.',b:'n'},
+{t:'Tomás tiene gastos regulares de educación, alimentación, transporte y salud.',b:'r'},
+{t:'¿Cuál es la capacidad económica actual del padre tras perder su empleo?',b:'f'},
+{t:'La madre busca una solución que dé estabilidad al niño.',b:'r'},
+{t:'¿Qué gastos están soportados con recibos y cuáles son estimados?',b:'f'}],
+stages:[
+{q:'¿Qué información debe recopilarse?',w:{evidencias:6,problema:2,ruta:2},intro:'Marcela trae muchos datos y emociones. Decides qué información recopilar primero.',
+opts:[
+{s:'Gastos, acuerdo y aportes',l:'Los gastos del niño con sus soportes, el acuerdo previo tal como quedó y los aportes realmente recibidos, mes a mes.',v:'adecuada',flag:'org',c:'Con una tabla mes a mes se ve con claridad la diferencia entre lo acordado y lo recibido, y qué gastos tienen soporte.',f:'Datos organizados y soportados permiten una orientación objetiva centrada en el niño.'},
+{s:'Vida personal del padre',l:'Información sobre la vida personal y las nuevas relaciones del padre.',v:'riesgosa',c:'La conversación se desvía hacia reproches. Marcela se siente peor y no avanzas en lo que el niño necesita.',f:'Indagar en la vida privada sin relación con la obligación no es pertinente y escala el conflicto.'},
+{s:'Solo el monto justo',l:'Solo el monto que la madre considera justo.',v:'insuficiente',c:'Tienes una cifra, pero no sabes en qué se basa ni qué está soportado.',f:'La expectativa debe sustentarse en necesidades y soportes concretos.'},
+{s:'Capturas de discusiones',l:'Las capturas de las discusiones más fuertes para mostrar que el padre actuó mal.',v:'riesgosa',c:'El expediente se llena de reproches que no aportan a las necesidades de Tomás.',f:'Enfocarse en demostrar culpas desplaza el centro del análisis: el interés del niño.'}],
+just:[{t:'Datos organizados y soportados permiten una orientación objetiva centrada en el niño.',q:1},{t:'Conocer el contexto de la familia siempre ayuda.',q:.5},{t:'Mostrar el comportamiento del padre fortalece la posición de la madre.',q:0}]},
+{q:'¿Qué necesidades deben priorizarse?',w:{problema:6,ruta:4},intro:'No todo puede resolverse al mismo tiempo. Decides qué priorizar.',
+opts:[
+{s:'Necesidades actuales del niño',l:'Las necesidades actuales y continuas del niño (alimentación, educación, salud, transporte) y la estabilidad de un aporte periódico.',v:'adecuada',c:'Marcela siente que por fin hay un orden: lo urgente para Tomás primero, y lo demás en una ruta.',f:'El interés superior del niño orienta a priorizar sus necesidades presentes y su estabilidad.'},
+{s:'Cobrar primero lo adeudado',l:'Cobrar primero todo lo adeudado, aunque se retrasen los gastos presentes.',v:'insuficiente',c:'Lo adeudado importa, pero el transporte de este mes sigue sin pagarse.',f:'Lo atrasado no debe perderse de vista, pero no puede desplazar lo que el niño necesita hoy.'},
+{s:'Que reconozca su error',l:'Que el padre reconozca que actuó mal.',v:'insuficiente',c:'Es un sentimiento comprensible, pero no resuelve ninguna necesidad concreta de Tomás.',f:'Lo emocional es legítimo; la orientación jurídica debe enfocarse en soluciones para el niño.'},
+{s:'Suspender visitas',l:'Suspender el contacto del niño con su padre hasta que pague.',v:'riesgosa',c:'Tomás pierde algo que valora y el conflicto escala. No se gana nada en lo económico.',f:'Las obligaciones económicas y la relación paterno-filial son asuntos distintos; condicionar una a la otra afecta al niño.'}],
+just:[{t:'El interés superior del niño exige priorizar sus necesidades presentes y su estabilidad.',q:1},{t:'Lo adeudado también es importante y no debe perderse.',q:.5},{t:'La madre merece una reparación por lo que ha vivido.',q:0}]},
+{q:'¿Qué hechos deben aclararse?',w:{evidencias:4,problema:4,ruta:2},intro:'Hay vacíos en la historia. Decides qué hechos aclarar.',introIf:[{f:'org',t:'La tabla mes a mes que organizaste muestra justo dónde están los vacíos.'}],
+opts:[
+{s:'Montos, causa y capacidad',l:'Desde cuándo y en qué montos disminuyeron los aportes, qué causa se comunicó y cuál es la situación económica actual de ambos padres.',v:'adecuada',c:'Se aclara que el padre trabaja haciendo domicilios con ingresos variables. Esto orienta hacia un acuerdo realista y sostenible.',f:'La causa y la capacidad económica actual inciden en cómo buscar una solución que se cumpla.'},
+{s:'Culpa de la separación',l:'Quién tuvo la culpa de la separación.',v:'insuficiente',c:'La conversación vuelve al pasado de la pareja, sin aportar a la obligación con el niño.',f:'Las causas de la separación no definen la obligación de contribuir con el hijo.'},
+{s:'Ninguno: no paga',l:'Ninguno: basta con decir que el padre no paga.',v:'riesgosa',flag:'precip',c:'Omites que el padre sí ha hecho aportes parciales y que su situación cambió. La orientación pierde precisión.',f:'Simplificar los hechos lleva a soluciones que pueden no ser sostenibles.'},
+{s:'Si el niño lo sabe',l:'Si el niño sabe que su papá no está aportando.',v:'riesgosa',c:'La pregunta pone a Tomás en medio de un conflicto de adultos.',f:'No es un hecho determinante y puede exponer al niño a la disputa entre sus padres.'}],
+just:[{t:'La causa y la capacidad económica actual inciden en una solución sostenible.',q:1},{t:'Entre más se sepa de la historia, mejor.',q:.5},{t:'Los detalles no importan si el resultado es que no paga.',q:0}]},
+{q:'¿Qué alternativas de orientación pueden analizarse?',w:{problema:8,ruta:7},intro:'Con las necesidades y los hechos claros, exploras alternativas.',introIf:[{f:'precip',t:'Simplificaste los hechos antes. Revisa si la alternativa que elijas tiene en cuenta los aportes parciales y la nueva situación del padre.'}],
+opts:[
+{s:'Acuerdo conciliado y formalizado',l:'Explorar primero un acuerdo conciliado y formalizado ante la autoridad o el centro de conciliación competente y, si no es posible, evaluar con orientación profesional el proceso de alimentos que proceda.',v:'adecuada',c:'Marcela se siente acompañada: hay un camino de diálogo con respaldo formal y una alternativa clara si no funciona.',f:'Un acuerdo formalizado puede ser más rápido y sostenible; la vía judicial queda como alternativa evaluada.'},
+{s:'Proceso sin diálogo',l:'Iniciar de inmediato un proceso sin intentar diálogo ni revisar requisitos.',v:'riesgosa',c:'Al revisar descubres requisitos previos y una disposición al diálogo que no se aprovechó.',f:'Saltarse el diálogo y los requisitos puede retrasar la solución y aumentar el conflicto.'},
+{s:'No insistir más',l:'Que la madre deje de insistir: el padre perdió el trabajo y no hay nada que hacer.',v:'riesgosa',c:'Marcela se va sin alternativas y las necesidades de Tomás siguen sin cubrirse.',f:'La obligación con el hijo no desaparece por un cambio económico; puede ajustarse, pero no ignorarse.'},
+{s:'Nuevo acuerdo por chat',l:'Proponer un nuevo acuerdo por mensaje, sin soportes ni formalización.',v:'insuficiente',c:'Es un avance, pero repite la informalidad que ya falló una vez.',f:'El diálogo es valioso, pero sin formalización el acuerdo puede volver a incumplirse.'}],
+just:[{t:'Un acuerdo formalizado puede ser más sostenible; la vía judicial queda como alternativa evaluada.',q:1},{t:'Lo importante es que haya algún tipo de acuerdo.',q:.5},{t:'Entre más presión, más rápido paga.',q:0}]}],
+order:{q:'¿Cómo construir una ruta de actuación responsable?',items:['Escuchar a la madre con un enfoque centrado en el niño','Organizar gastos, soportes y aportes recibidos mes a mes','Identificar la información faltante (formalidad del acuerdo, capacidad económica)','Priorizar las necesidades actuales y continuas del niño','Explorar un acuerdo conciliado y formalizado','Si no hay acuerdo, evaluar con orientación profesional la vía judicial que proceda']},
+refs:'Normativa a verificar: régimen vigente de alimentos y protección de niños, niñas y adolescentes (en Colombia, Código de la Infancia y la Adolescencia, Ley 1098 de 2006) y requisitos de conciliación.'}
+];
+
+/* ============ ESTADO ============ */
+const KEY='ruta-lab-v1';
+const blank=()=>({started:false,phase:'intro',opened:[],facts:{},factsDone:false,stage:0,choices:[],ord:[],orderDone:false,done:false,celebrated:false,final:null});
+function fresh(){return{name:'',cases:{c1:blank(),c2:blank(),c3:blank()},survey:[],rubric:{},rm:null}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.cases&&d.cases.c1)return Object.assign(fresh(),d)}catch(e){}return fresh()}
+let S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+/* ---- Firestore (sin Storage) ---- */
+const FBV='10.12.2';let DB=null,REMOTE=null;
+async function initDB(){const cfg=window.RUTA_FIREBASE;if(!cfg||!cfg.apiKey||!cfg.projectId)return;
+  try{const A=await import(`https://www.gstatic.com/firebasejs/${FBV}/firebase-app.js`);const F=await import(`https://www.gstatic.com/firebasejs/${FBV}/firebase-firestore.js`);
+    DB={F,db:F.getFirestore(A.initializeApp(cfg))};await loadRemote();}catch(e){console.warn('Firebase no disponible:',e);DB=null}}
+async function loadRemote(){if(!DB)return;try{const{F,db}=DB;const snap=await F.getDocs(F.query(F.collection(db,'evaluaciones'),F.limit(500)));const rows=snap.docs.map(d=>d.data());
+  REMOTE={n:rows.length,avg:[1,2,3,4,5].map(k=>rows.length?rows.reduce((a,r)=>a+(r['p'+k]||0),0)/rows.length:0),txt:rows.map(r=>r.mejora).filter(Boolean).slice(-8)};
+  if(cur==='evaluacion'||cur==='matriz')rerender()}catch(e){console.warn('No se pudieron leer las evaluaciones:',e)}}
+async function saveSurveyDB(a,t){if(!DB)return false;try{const{F,db}=DB;await F.addDoc(F.collection(db,'evaluaciones'),{p1:a[0],p2:a[1],p3:a[2],p4:a[3],p5:a[4],mejora:t.slice(0,1000),fecha:F.serverTimestamp()});await loadRemote();return true}catch(e){console.warn(e);return false}}
+async function saveResultDB(id,sc){if(!DB)return;try{const{F,db}=DB;const v=x=>Math.round(x/20*100)/100;await F.addDoc(F.collection(db,'resultados'),{caso:id,nota:v(sc.total),hechos:v(sc.hechos),problema:v(sc.problema),evidencias:v(sc.evidencias),ruta:v(sc.ruta),argumentacion:v(sc.argumentacion),fecha:F.serverTimestamp()})}catch(e){console.warn(e)}}
+if(S.rm===null){try{S.rm=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){S.rm=false}}
+document.body.classList.toggle('rm',!!S.rm);
+
+/* ============ UTILIDADES ============ */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const C=id=>CASES.find(c=>c.id===id);
+const r0=n=>Math.round(n);
+const n5=t=>(Math.round(t/2)/10).toFixed(1);const d5=t=>(t/20).toFixed(2);
+function seedShuffle(n,seed){const a=[...Array(n).keys()];let s=seed%233280||7;for(let i=n-1;i>0;i--){s=(s*9301+49297)%233280;const j=Math.floor(s/233280*(i+1));[a[i],a[j]]=[a[j],a[i]]}if(a.every((v,i)=>v===i))a.reverse();return a}
+const hash=str=>[...str].reduce((h,c)=>(h*31+c.charCodeAt(0))%100000,17);
+function lis(a){const t=[];for(const x of a){let lo=0,hi=t.length;while(lo<hi){const m=(lo+hi)>>1;if(t[m]<x)lo=m+1;else hi=m}t[lo]=x}return t.length}
+function orderPts(c,cs){if(!cs.orderDone)return 0;const n=c.order.items.length;return 10*(lis(cs.ord)-1)/(n-1)}
+function flags(c,cs){return cs.choices.map((ch,i)=>ch&&ch.done?c.stages[i].opts[ch.opt].flag:null).filter(Boolean)}
+function score(c,cs){
+  const d={hechos:0,problema:0,evidencias:0,ruta:0,argumentacion:0};
+  if(cs.factsDone){let ok=0;c.facts.forEach((f,i)=>{if(cs.facts[i]===f.b)ok++});d.hechos=20*ok/c.facts.length}
+  d.evidencias=10*cs.opened.length/c.evid.length;
+  cs.choices.forEach((ch,i)=>{if(!ch||!ch.done)return;const st=c.stages[i],q=Q[st.opts[ch.opt].v];for(const k in st.w)d[k]+=st.w[k]*q;d.argumentacion+=3.75*st.just[ch.just].q});
+  d.ruta+=orderPts(c,cs);
+  d.total=d.hechos+d.problema+d.evidencias+d.ruta+d.argumentacion;
+  return d;
+}
+function level(t){t=Math.round(t/2)/10;return t>=4.3?['Estratega de casos','#F4B942']:t>=3.5?['Analista en formación','#40E0D0']:t>=2.5?['Explorador de casos','#4CA9FF']:['Ruta por reconstruir','#F06464']}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;$('#toast').appendChild(t);setTimeout(()=>t.remove(),3200)}
+function floatPts(n,el){if(n<=0)return;const r=(el||document.body).getBoundingClientRect();const f=document.createElement('div');f.className='float';f.textContent='+'+d5(n);f.style.left=Math.min(innerWidth-120,r.left+r.width/2-40)+'px';f.style.top=Math.max(80,r.top+20)+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1500)}
+function sparks(n=26){if(S.rm)return;const cx=innerWidth/2,cy=innerHeight/2;const cols=['#F4B942','#40E0D0','#4CA9FF'];for(let i=0;i<n;i++){const s=document.createElement('i');s.className='spark';const a=Math.random()*Math.PI*2,d=90+Math.random()*160;s.style.cssText=`left:${cx}px;top:${cy}px;background:${cols[i%3]};--x:${Math.cos(a)*d}px;--y:${Math.sin(a)*d}px`;document.body.appendChild(s);setTimeout(()=>s.remove(),1300)}}
+const ICON={check:'<svg viewBox="0 0 24 24" fill="none" stroke="#40E0D0" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6"/></svg>',warn:'<svg viewBox="0 0 24 24" fill="none" stroke="#F4B942" stroke-width="2.4"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v.5"/></svg>',risk:'<svg viewBox="0 0 24 24" fill="none" stroke="#F06464" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 16.5v.5"/></svg>',motion:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>',still:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18"/></svg>',tour:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z" fill="currentColor"/></svg>',seal:'<svg viewBox="0 0 24 24" fill="none" stroke="#F4B942" stroke-width="1.8"><path d="M12 2l2.4 2.1 3.2-.3.9 3.1 2.8 1.6-1 3 1 3-2.8 1.6-.9 3.1-3.2-.3L12 22l-2.4-2.1-3.2.3-.9-3.1L2.7 15.5l1-3-1-3 2.8-1.6.9-3.1 3.2.3z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>'};
+const VICON={adecuada:ICON.check,insuficiente:ICON.warn,riesgosa:ICON.risk};
+
+/* ============ TYPEWRITER ============ */
+const typed=new Set();let typeTok=0;
+function runType(){
+  document.querySelectorAll('[data-tkey]').forEach(el=>{
+    const k=el.dataset.tkey,txt=el.textContent;
+    if(S.rm||typed.has(k))return;
+    typed.add(k);const tok=++typeTok;el.textContent='';el.classList.add('caret');let i=0;
+    const skip=()=>{i=txt.length};el.addEventListener('click',skip,{once:true});
+    (function step(){if(!el.isConnected)return;i=Math.min(txt.length,i+2);el.textContent=txt.slice(0,i);if(i<txt.length)setTimeout(step,18);else el.classList.remove('caret')})();
+  });
+}
+function countUps(){document.querySelectorAll('[data-count]').forEach(el=>{const to=+el.dataset.count,from=+(el.dataset.from||0),dc=+(el.dataset.dec||0),fm=v=>dc?v.toFixed(dc):r0(v);if(S.rm||from===to){el.textContent=fm(to);return}const t0=performance.now(),dur=1100;(function f(t){const p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);el.textContent=fm(from+(to-from)*e);if(p<1)requestAnimationFrame(f)})(t0)})}
+function bars(){requestAnimationFrame(()=>requestAnimationFrame(()=>{document.querySelectorAll('[data-w]').forEach(el=>el.style.width=el.dataset.w+'%');document.querySelectorAll('[data-off]').forEach(el=>el.style.strokeDashoffset=el.dataset.off)}))}
+
+/* ============ ROUTER ============ */
+let cur='',last='';const prevLive={};
+const NAV=[['panel','Panel'],['expedientes','Expedientes'],['proceso','Del problema al prototipo'],['evaluacion','Evaluación'],['matriz','Matriz'],['cierre','Resultados']];
+function go(h){cur=h;render(h,false);window.scrollTo({top:0,behavior:S.rm?'auto':'smooth'});try{if(location.hash.slice(1)!==h)location.hash=h}catch(e){}}
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1)||'inicio';if(h!==cur){cur=h;render(h,false)}});
+function rerender(){render(cur,true)}
+function render(h,soft){
+  const app=$('#app');let html='';
+  const m=h.match(/^(caso|resultado)-(c[123]|demo)$/);
+  if(h==='panel')html=vPanel();else if(h==='expedientes')html=vCases();
+  else if(m&&m[1]==='caso'&&C(m[2]))html=vCase(m[2]);
+  else if(m&&m[1]==='resultado')html=m[2]==='demo'?vResult('c1',DEMO):(S.cases[m[2]]&&S.cases[m[2]].done?vResult(m[2]):vCase(m[2]));
+  else if(h==='proceso')html=vDesign();else if(h==='evaluacion')html=vSurvey();else if(h==='matriz')html=vMatrix();else if(h==='cierre')html=vClose();
+  else{h='inicio';html=vIntro()}
+  const isNew=h!==last;last=h;
+  app.innerHTML=`<div class="${isNew&&!soft?'view':''}">${html}</div>`;
+  renderTop(h);runType();countUps();bars();if(tourOn)renderTour();
+  if(m&&m[1]==='resultado'&&m[2]!=='demo'){const cs=S.cases[m[2]];if(cs&&cs.done&&!cs.celebrated){cs.celebrated=true;save();celebrate(m[2])}}
+}
+function renderTop(h){
+  const top=$('#top');top.hidden=h==='inicio';if(top.hidden)return;
+  const dn=CASES.filter(c=>S.cases[c.id].done);const tot=dn.length?dn.reduce((a,c)=>a+S.cases[c.id].final.total,0)/dn.length:0;
+  const key=h.startsWith('caso')||h.startsWith('resultado')?'expedientes':h;
+  top.innerHTML=`<div class="top-in"><button class="brand" data-go="inicio" aria-label="Inicio de RUTA">RUTA</button><nav class="nav" aria-label="Módulos">${NAV.map(([k,l])=>`<button data-go="${k}" class="${k===key?'on':''}">${l}</button>`).join('')}</nav><div class="tools"><span class="chip" title="Promedio de los expedientes completados (escala 0 a 5)">Promedio ${n5(tot)} / 5.0</span><button class="icob" data-act="tour" aria-label="Recorrido demostrativo" title="Recorrido demostrativo">${ICON.tour}</button><button class="icob" data-act="rm" aria-pressed="${!!S.rm}" aria-label="${S.rm?'Activar animaciones':'Reducir animaciones'}" title="${S.rm?'Animaciones reducidas: activar':'Reducir animaciones'}">${S.rm?ICON.still:ICON.motion}</button></div></div>`;
+}
+const DISC=`<p class="disc">Escenarios ficticios con fines exclusivamente académicos. RUTA no constituye asesoría jurídica: toda actuación debe validarse con la legislación vigente y con orientación profesional.</p>`;
+
+/* ============ VISTA: INICIO ============ */
+function vIntro(){return`<section class="hero"><div><h1 class="logo" aria-label="RUTA"><span>R</span><span>U</span><span>T</span><span>A</span></h1><p class="sub">EL CASO BAJO DECISIÓN</p><p class="sub2">Laboratorio interactivo de decisiones jurídicas</p><p class="quote">“Los hechos están sobre la mesa. La decisión es tuya.”</p><button class="btn btn-p big" data-go="panel">[ INICIAR INVESTIGACIÓN ]</button><p class="lead">En el ejercicio de la práctica jurídica, conocer la norma es solo el comienzo. Cada caso requiere analizar hechos, interpretar evidencias, identificar necesidades y construir una ruta de actuación fundamentada.</p><div class="hero-links"><button class="btn btn-g" data-act="tour">${ICON.tour} Recorrido demostrativo</button><button class="btn btn-g" data-go="proceso">Del problema al prototipo</button></div></div>
+<div class="hero-pic" aria-hidden="true"><div class="desk"></div><svg class="hero-route" viewBox="0 0 400 400"><path d="M40 360 C 90 300, 60 250, 130 230 S 230 260, 260 200 S 330 120, 370 50" fill="none" stroke="url(#gr)" stroke-width="3" stroke-linecap="round" opacity=".9"/>${[[40,360],[130,230],[260,200],[370,50]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="6" fill="#0B1120" stroke="#40E0D0" stroke-width="3"/>`).join('')}</svg><div class="folder"><div class="back"></div><div class="paper p2"></div><div class="paper"><b>EXPEDIENTE</b>Hechos · Evidencias · Problema<i></i><i style="width:80%"></i><i style="width:60%"></i>Decisión · Ruta<i style="width:70%"></i><i style="width:85%"></i></div><div class="cover"><span>EXP 001–003</span></div></div><div class="stamp">EN ANÁLISIS</div></div></section>`}
+
+/* ============ VISTA: PANEL ============ */
+function skillVals(){
+  const done=CASES.filter(c=>S.cases[c.id].done);if(!done.length)return null;
+  const avg=k=>done.reduce((a,c)=>a+S.cases[c.id].final[k]/DIMS.find(d=>d[0]===k)[2],0)/done.length*100;
+  let qs=[];done.forEach(c=>S.cases[c.id].choices.forEach((ch,i)=>qs.push(Q[c.stages[i].opts[ch.opt].v])));
+  return[['Análisis de hechos',avg('hechos')],['Identificación del problema jurídico',avg('problema')],['Revisión de evidencias',avg('evidencias')],['Toma de decisiones',qs.reduce((a,b)=>a+b,0)/qs.length*100],['Argumentación',avg('argumentacion')],['Construcción de rutas de actuación',avg('ruta')]];
+}
+function vPanel(){
+  const done=CASES.filter(c=>S.cases[c.id].done).length;
+  const tot=done?CASES.reduce((a,c)=>a+(S.cases[c.id].done?S.cases[c.id].final.total:0),0)/done:0;
+  const prog=r0((CASES.reduce((a,c)=>{const cs=S.cases[c.id];if(cs.done)return a+1;if(!cs.started)return a;const p=['intro','evid','facts','stage','order'].indexOf(cs.phase);return a+(p+cs.choices.filter(x=>x&&x.done).length*.4)/7},0))/3*100);
+  const sk=skillVals();const name=S.name||'Investigador/a';
+  const nodes=[...CASES.map(c=>[c.num.replace('EXP-',''),c.area.split(' · ').pop(),S.cases[c.id].done]),['EV','Evaluación',S.survey.length>0],['FIN','Resultados',done===3]];
+  return`<div class="wrap"><div class="head"><span class="eyebrow">Panel de investigador</span><h2>Bienvenido/a al laboratorio, ${esc(name)}</h2><p class="mut">Tres expedientes esperan análisis. Cada decisión deja huella en tu ruta.</p></div>
+<div class="grid g2"><div class="panel"><div class="prof"><div class="avatar">${esc((S.name||'IJ').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase())}</div><div style="flex:1"><label class="small mut" for="nm">Nombre del investigador</label><input id="nm" class="inp" data-inp="name" value="${esc(S.name)}" placeholder="Escribe tu nombre" autocomplete="name"><div class="row" style="margin-top:8px"><span class="tag ok">Nivel: Investigador jurídico</span></div></div></div>
+<div class="row" style="margin-top:22px;gap:22px;flex-wrap:nowrap"><svg class="ring" viewBox="0 0 132 132" role="img" aria-label="Progreso general ${prog}%"><circle class="tr" cx="66" cy="66" r="54"/><circle class="fg" cx="66" cy="66" r="54" stroke-dasharray="339.3" stroke-dashoffset="339.3" data-off="${339.3*(1-prog/100)}" transform="rotate(-90 66 66)"/><text x="66" y="62" text-anchor="middle" fill="#F3F6FC" font-family="Sora" font-weight="700" font-size="28">${prog}%</text><text x="66" y="84" text-anchor="middle" fill="#9DB0CA" font-size="12">progreso</text></svg>
+<div class="kpis" style="flex:1"><div class="kpi"><b data-count="${3-done}">0</b><span>Casos disponibles</span></div><div class="kpi"><b data-count="${done}">0</b><span>Casos completados</span></div><div class="kpi"><b class="gold" data-count="${tot/20}" data-dec="1">0</b><span>Calificación promedio / 5.0</span></div></div></div>
+<div class="row" style="margin-top:20px"><button class="btn btn-p" data-act="continue">Continuar investigación</button><button class="btn btn-g" data-go="expedientes">Ver expedientes</button></div></div>
+<div class="panel"><h3>Habilidades desarrolladas</h3><p class="small mut">${sk?'Promedio de los expedientes completados.':'Se calculan al completar tu primer expediente.'}</p>${(sk||[['Análisis de hechos',0],['Identificación del problema jurídico',0],['Revisión de evidencias',0],['Toma de decisiones',0],['Argumentación',0],['Construcción de rutas de actuación',0]]).map(([l,v])=>`<div class="skill"><span>${l}</span><em>${r0(v)}%</em><div class="bar"><i data-w="${v}"></i></div></div>`).join('')}</div></div>
+<div class="panel" style="margin-top:18px"><h3>Ruta de progreso</h3><div class="track">${nodes.map((n,i)=>`${i?`<div class="link ${nodes[i-1][2]?'on':''}"></div>`:''}<div class="node ${n[2]?'on':''}"><i>${n[0]}</i>${n[1]}</div>`).join('')}</div>
+<div class="row" style="margin-top:10px"><button class="btn btn-g btn-d" data-act="resetall">Reiniciar todo el progreso</button></div></div>${DISC}</div>`}
+
+/* ============ VISTA: EXPEDIENTES ============ */
+function vCases(){return`<div class="wrap"><div class="head"><span class="eyebrow">Selección de expedientes</span><h2>Elige un expediente para investigar</h2><p class="mut">Cada caso es una historia ramificada: tus decisiones cambian lo que ocurre después. Puedes resolverlos en cualquier orden.</p></div><div class="grid g3">${CASES.map(c=>{const cs=S.cases[c.id];const st=cs.done?'Completado':cs.started?'En curso':'Disponible';return`<article class="panel ccard">${cs.done?`<span class="tag gold done-badge">${n5(cs.final.total)} / 5.0</span>`:''}<span class="num">${c.num}</span><h3>${c.title}</h3><div class="row"><span class="tag">${c.area}</span><span class="tag ${cs.done?'ok':cs.started?'gold':''}">${st}</span></div><p class="mut" style="margin:6px 0 0">${c.desc}</p><dl class="meta"><dt>Dificultad</dt><dd><span class="dots" aria-hidden="true">${'●'.repeat(c.dots)}${'○'.repeat(3-c.dots)}</span> ${c.diff}</dd><dt>Tiempo</dt><dd>${c.time}</dd><dt>Objetivo</dt><dd>${c.goal}</dd></dl><div class="row" style="margin-top:auto">${cs.done?`<button class="btn btn-p" data-go="resultado-${c.id}">Ver resultado</button><button class="btn btn-g" data-act="reset" data-c="${c.id}">Reiniciar caso</button>`:`<button class="btn btn-p" data-act="start" data-c="${c.id}">${cs.started?'Continuar':'Abrir expediente'}</button>${cs.started?`<button class="btn btn-g" data-act="reset" data-c="${c.id}">Reiniciar</button>`:''}`}</div></article>`}).join('')}</div>${DISC}</div>`}
+
+/* ============ VISTA: CASO ============ */
+function vCase(id){
+  const c=C(id),cs=S.cases[id];if(!cs.started){cs.started=true;save()}
+  const sc=score(c,cs),pl=prevLive[id]??sc.total;prevLive[id]=sc.total;
+  const ph=['intro','evid','facts','stage','order'],pi=ph.indexOf(cs.phase);
+  const plabels=['Apertura','Evidencias','Hechos','Decisiones','Ruta'];
+  let body='';
+  if(cs.phase==='intro')body=pIntro(c,cs);else if(cs.phase==='evid')body=pEvid(c,cs);else if(cs.phase==='facts')body=pFacts(c,cs);else if(cs.phase==='stage')body=pStage(c,cs);else body=pOrder(c,cs);
+  const nDone=cs.choices.filter(x=>x&&x.done).length;
+  const lit=[cs.started,cs.factsDone,cs.opened.length>=c.evid.length,nDone>=3,cs.factsDone&&nDone>=2,nDone>=4,nDone>=4,cs.orderDone];
+  return`<div class="wrap"><div class="row" style="justify-content:space-between;margin-bottom:10px"><div><span class="eyebrow">${c.num} · ${c.area}</span><h2 style="font-size:clamp(24px,3.2vw,36px)">${c.title}</h2></div><button class="btn btn-g" data-go="expedientes">← Expedientes</button></div>
+<div class="phases" aria-label="Fases del expediente">${plabels.map((l,i)=>`<span class="${i<pi?'on':i===pi?'now':''}">${l}${i===3&&cs.phase==='stage'?` ${cs.stage+1}/4`:''}</span>`).join('')}</div>
+<div class="case"><section class="panel">${body}</section>
+<aside class="side"><div class="panel"><h4>Calificación del expediente (0 a 5)</h4><div><b style="font:800 40px Sora,sans-serif" data-count="${sc.total/20}" data-from="${pl/20}" data-dec="1">0</b><span class="mut"> / 5.0</span></div><div class="mini">${DIMS.map(([k,l,mx])=>`<div><span>${l}</span><em>${d5(sc[k])}/${d5(mx)}</em><div class="bar"><i data-w="${sc[k]/mx*100}"></i></div></div>`).join('')}</div></div>
+<div class="panel"><h4>Ruta en construcción</h4><ol class="rail">${STEPS.map((s,i)=>`<li class="${lit[i]?'on':''}">${s}</li>`).join('')}</ol></div>
+${cs.phase!=='intro'?`<div class="panel"><h4>Evidencias</h4><div class="evlist">${c.evid.map((e,i)=>`<button data-act="evid" data-i="${i}"><span>${e.t}</span><span class="${cs.opened.includes(i)?'tq':'mut'}">${cs.opened.includes(i)?'✓':'○'}</span></button>`).join('')}</div></div>`:''}
+<button class="btn btn-g btn-d" data-act="reset" data-c="${id}">Reiniciar este caso</button></aside></div>${DISC}</div>`;
+}
+function pIntro(c,cs){
+  const first=!typed.has('open-'+c.id);typed.add('open-'+c.id);
+  return`${first&&!S.rm?`<div class="opening" aria-hidden="true"><div class="f"><b>${c.num}</b><span class="mut">${c.title}</span></div><div class="lid">EXPEDIENTE</div></div>`:''}
+<span class="eyebrow">Recepción del caso</span><div class="client"><div class="avatar">${c.client.i}</div><div><b>${c.client.n}</b><br><span class="small mut">${c.client.r}</span></div></div>
+<p class="narr" data-tkey="intro-${c.id}">${c.intro}</p>${c.sens?`<div class="note tq">${c.sens}</div>`:''}
+<div class="note"><b>Reto del investigador:</b> ${c.goal}</div>
+<div class="row"><button class="btn btn-p" data-act="phase" data-p="evid">Abrir evidencias →</button></div>`}
+function pEvid(c,cs){
+  const left=c.evid.length-cs.opened.length;
+  return`<span class="eyebrow">Revisión de evidencias</span><h3>Examina los documentos del expediente</h3><p class="mut">Abre cada documento. Las pistas te ayudarán a distinguir hechos relevantes de información faltante.</p>
+<div class="evs">${c.evid.map((e,i)=>`<button class="ev ${cs.opened.includes(i)?'seen':''}" data-act="evid" data-i="${i}"><small>DOC ${String(i+1).padStart(2,'0')} · ${e.k}</small><b>${e.t}</b><span class="st">${cs.opened.includes(i)?'✓ Revisado':'Sin revisar'}</span></button>`).join('')}</div>
+${warnEvid?`<div class="note red" role="alert"><b>Indicador de riesgo:</b> tienes ${left} evidencia${left>1?'s':''} sin revisar. Avanzar sin revisarlas afecta tu puntaje en Revisión de evidencias y puede ocultarte información clave.</div><div class="row"><button class="btn btn-g" data-act="warnoff">Seguir revisando</button><button class="btn btn-d btn-g" data-act="phase" data-p="facts">Avanzar de todas formas</button></div>`:`<div class="row" style="margin-top:18px"><span class="tag ${left?'':'ok'}">${cs.opened.length}/${c.evid.length} revisadas</span><button class="btn btn-p" data-act="tofacts">Ir al tablero de hechos →</button></div>`}`}
+let warnEvid=false;
+function pFacts(c,cs){
+  const all=c.facts.every((f,i)=>cs.facts[i]);
+  return`<span class="eyebrow">Reconstrucción de hechos</span><h3>Tablero de hechos</h3><p class="mut">Clasifica cada enunciado: ¿es un hecho relevante para el caso, una información que falta confirmar o un dato que no es relevante?</p>
+<div class="facts">${c.facts.map((f,i)=>{const v=cs.facts[i];const cls=cs.factsDone?(v===f.b?'right':'wrong'):'';return`<div class="fact ${cls}"><div>${f.t}${cs.factsDone&&v!==f.b?`<div class="small red">Correcto: ${BIN[f.b]}</div>`:''}</div><div class="seg" role="group" aria-label="Clasificación">${['r','f','n'].map(b=>`<button class="${v===b?'on '+b:''}" data-act="bin" data-i="${i}" data-b="${b}" ${cs.factsDone?'disabled':''} aria-pressed="${v===b}">${BIN[b]}</button>`).join('')}</div></div>`}).join('')}</div>
+${cs.factsDone?(()=>{const ok=c.facts.filter((f,i)=>cs.facts[i]===f.b).length;return`<div class="verdict ${ok>=6?'adecuada':ok>=4?'insuficiente':'riesgosa'}">${VICON[ok>=6?'adecuada':ok>=4?'insuficiente':'riesgosa']}<div><b>${ok} de ${c.facts.length} clasificaciones acertadas</b><br><span class="small">Distinguir lo que sabes de lo que falta confirmar es la base de una orientación prudente.</span></div></div><button class="btn btn-p" data-act="phase" data-p="stage">Pasar a las decisiones →</button>`})():`<div class="row" style="margin-top:18px"><button class="btn btn-p" data-act="factsok" ${all?'':'disabled'}>Confirmar tablero</button><span class="small mut">${Object.keys(cs.facts).length}/${c.facts.length} clasificados</span></div>`}`}
+function pStage(c,cs){
+  const si=cs.stage,st=c.stages[si],ch=cs.choices[si]||{};const fl=flags(c,cs);
+  const ctx=(st.introIf||[]).filter(x=>fl.includes(x.f)).map(x=>x.t);
+  const oo=seedShuffle(st.opts.length,hash(c.id+si)),jo=seedShuffle(st.just.length,hash(c.id+'j'+si));
+  const K='ABCD';
+  let h=`<span class="eyebrow">Decisión ${si+1} de 4</span>${ctx.map(t=>`<div class="note ${fl.includes('precip')||fl.includes('omit')?'red':'tq'}"><b>Consecuencia de decisiones anteriores:</b> ${t}</div>`).join('')}<p class="mut">${st.intro}</p><p class="q">${st.q}</p>
+<div class="opts" role="group" aria-label="Opciones">${oo.map((oi,k)=>{const o=st.opts[oi];const sel=ch.opt===oi;const cls=ch.done?(sel?`sel lock v-${o.v}`:'dim'):(sel?'sel':'');return`<button class="opt ${cls}" data-k="${K[k]}" data-act="opt" data-i="${oi}" aria-pressed="${sel}">${o.l}</button>`}).join('')}</div>`;
+  if(ch.opt!=null&&!ch.done){h+=`<div class="just"><b>¿Por qué eliges esta actuación?</b><p class="small mut">La justificación forma parte de tu puntaje en argumentación.</p><div class="opts">${jo.map((ji,k)=>`<button class="opt ${ch.just===ji?'sel':''}" data-k="${k+1}" data-act="just" data-i="${ji}" aria-pressed="${ch.just===ji}">${st.just[ji].t}</button>`).join('')}</div></div><div class="row" style="margin-top:16px"><button class="btn btn-p" data-act="decide" ${ch.just!=null?'':'disabled'}>Confirmar decisión</button></div>`}
+  if(ch.done){const o=st.opts[ch.opt],q=Q[o.v],jq=st.just[ch.just].q;const pts=Object.entries(st.w).map(([k,w])=>`<span class="tag ${q===1?'ok':q?'gold':'red'}">+${d5(w*q)} ${DIMS.find(d=>d[0]===k)[1].split(' ').pop()}</span>`).join('')+`<span class="tag ${jq===1?'ok':jq?'gold':'red'}">+${d5(3.75*jq)} argumentación</span>`;
+    h+=`<div class="verdict ${o.v}">${VICON[o.v]}<div><b>${VLBL[o.v]}</b>${o.v==='riesgosa'?'<br><span class="small">Indicador de riesgo: esta actuación puede afectar los intereses de la persona usuaria.</span>':''}</div></div>
+<div class="conseq"><h4>Consecuencia en el caso</h4><p class="narr" style="font-size:16px" data-tkey="cq-${c.id}-${si}-${ch.opt}-${ch.recon||0}">${o.c}</p></div>
+<div class="conseq"><h4>Retroalimentación</h4><p>${o.f}</p><p class="small mut" style="margin:0">Tu justificación: “${st.just[ch.just].t}” — ${jq===1?'coherente con los hechos y la actuación.':jq?'parcialmente fundamentada.':'no fundamenta la decisión en los hechos del caso.'}</p><div class="pts">${pts}</div></div>
+<div class="row"><button class="btn btn-g" data-act="recon">↺ Reconsiderar decisión</button><button class="btn btn-p" data-act="next">${si<3?'Continuar →':'Construir la ruta final →'}</button></div>`}
+  return h;
+}
+function pOrder(c,cs){
+  const n=c.order.items.length,pool=seedShuffle(n,hash(c.id+'ord')).filter(i=>!cs.ord.includes(i));
+  let h=`<span class="eyebrow">Construcción de la ruta</span><p class="q">${c.order.q}</p><p class="mut">Toca las actuaciones en el orden en que las realizarías. Toca una actuación ya ubicada para retirarla.</p>
+<div class="grid g2" style="align-items:start"><div><h4>Tu ruta</h4><ol class="ordl">${cs.ord.map((i,k)=>`<li><button data-act="ordrm" data-i="${i}" ${cs.orderDone?'disabled':''} aria-label="Paso ${k+1}: ${esc(c.order.items[i])}. Retirar">${c.order.items[i]}${cs.orderDone?(i===k?' <span class="tq">✓</span>':' <span class="gold">↕</span>'):''}</button></li>`).join('')}</ol>${cs.ord.length<n?`<div class="slot" style="margin-top:8px">Paso ${cs.ord.length+1} de ${n}</div>`:''}</div>
+<div><h4>Actuaciones disponibles</h4><div class="pool">${pool.map(i=>`<button data-act="ordadd" data-i="${i}">${c.order.items[i]}</button>`).join('')||'<p class="small mut">Todas las actuaciones están ubicadas.</p>'}</div></div></div>`;
+  if(!cs.orderDone)h+=`<div class="row" style="margin-top:18px"><button class="btn btn-p" data-act="ordok" ${cs.ord.length===n?'':'disabled'}>Confirmar ruta</button><button class="btn btn-g" data-act="ordclr" ${cs.ord.length?'':'disabled'}>Vaciar</button></div>`;
+  else{const p=orderPts(c,cs);const v=p>=8?'adecuada':p>=5?'insuficiente':'riesgosa';h+=`<div class="verdict ${v}">${VICON[v]}<div><b>Ruta ${v==='adecuada'?'bien organizada':v==='insuficiente'?'parcialmente organizada':'por reorganizar'} · +${d5(p)}</b><br><span class="small">${v==='adecuada'?'Verificas antes de actuar y escalas solo cuando es necesario.':'Revisa la secuencia: primero escuchar y verificar, luego delimitar, después actuar y, por último, escalar.'}</span></div></div><div class="conseq"><h4>Secuencia de referencia</h4><ol class="list">${c.order.items.map(t=>`<li>${t}</li>`).join('')}</ol></div><button class="btn btn-p" data-act="finish">Cerrar expediente y ver resultado →</button>`}
+  return h;
+}
+
+/* ============ VISTA: RESULTADO ============ */
+const DEMO={demo:1,started:true,phase:'order',opened:[0,1,2,4],facts:{0:'r',1:'r',2:'f',3:'n',4:'r',5:'r',6:'r',7:'f'},factsDone:true,stage:3,choices:[{opt:0,just:0,done:true,recon:0},{opt:3,just:1,done:true,recon:0},{opt:0,just:0,done:true,recon:1},{opt:2,just:1,done:true,recon:0}],ord:[0,1,3,2,4,5],orderDone:true,done:true};
+function analysis(c,cs){
+  const sc=cs.demo?score(c,cs):(cs.final||score(c,cs));
+  const pct=k=>sc[k]/DIMS.find(d=>d[0]===k)[2];
+  const fBad=c.facts.filter(f=>f.b==='f').length,fOk=c.facts.filter((f,i)=>f.b==='f'&&cs.facts[i]==='f').length;
+  const st1=Q[c.stages[1].opts[cs.choices[1].opt].v],st3=Q[c.stages[3].opts[cs.choices[3].opt].v];
+  const vals=[1,pct('hechos'),pct('evidencias'),pct('problema'),(fOk/fBad+st1)/2,st3,pct('argumentacion'),orderPts(c,cs)/10];
+  return{sc,steps:vals.map(v=>v>=.75?'ok':v>=.5?'mid':'miss'),pct};
+}
+const STR={hechos:['Distingues con claridad los hechos relevantes de la información faltante.','Revisa qué enunciados son hechos probados y cuáles requieren confirmación.'],problema:['Delimitas el problema con base en los hechos, sin calificaciones precipitadas.','Evita calificar el caso con la figura más llamativa antes de verificar los hechos.'],evidencias:['Revisas y contrastas las evidencias antes de decidir.','Abre todos los documentos y elige pruebas según lo que necesitas sustentar.'],ruta:['Organizas una ruta proporcional: verificar, actuar y escalar.','Ordena las actuaciones de lo preparatorio a lo más formal.'],argumentacion:['Justificas tus decisiones con razones coherentes.','Fundamenta cada decisión en los hechos, no en la rapidez o la presión.']};
+function vResult(id,demo){
+  const c=C(id),cs=demo||S.cases[id];const{sc,steps,pct}=analysis(c,cs);const[ln,lc]=level(sc.total);
+  const fort=DIMS.filter(([k])=>pct(k)>=.75).map(([k])=>STR[k][0]);const recon=cs.choices.reduce((a,ch)=>a+(ch.recon||0),0);if(recon)fort.push(`Reconsideraste ${recon} decisión${recon>1?'es':''}: reflexionar y corregir es parte del razonamiento jurídico.`);
+  const mej=DIMS.filter(([k])=>pct(k)<.6).map(([k])=>STR[k][1]);
+  const best=cs.choices.map((ch,i)=>({st:c.stages[i],o:c.stages[i].opts[ch.opt],j:c.stages[i].just[ch.just].q})).filter(x=>x.o.v==='adecuada'&&x.j===1);
+  const omit=[...c.evid.map((e,i)=>cs.opened.includes(i)?null:`No revisaste la evidencia “${e.t}”.`),...c.facts.map((f,i)=>f.b==='f'&&cs.facts[i]!=='f'?`No identificaste como faltante: ${f.t}`:null),...cs.choices.map((ch,i)=>{const st=c.stages[i];if(st.opts[ch.opt].v==='adecuada')return null;const a=st.opts.find(o=>o.v==='adecuada');return`En “${st.q}” no consideraste: ${a.s.toLowerCase()}.`})].filter(Boolean);
+  const C2=2*Math.PI*96;
+  return`<div class="wrap">${demo?'<div class="note"><b>Resultado de ejemplo del recorrido demostrativo.</b> No corresponde a un usuario real ni modifica tu progreso.</div>':''}
+<div class="panel"><div class="res-top"><div class="lvl"><svg viewBox="0 0 220 220"><circle cx="110" cy="110" r="96" stroke="rgba(255,255,255,.07)"/><circle class="fg" cx="110" cy="110" r="96" stroke="${lc}" stroke-dasharray="${C2}" stroke-dashoffset="${C2}" data-off="${C2*(1-sc.total/100)}"/></svg><div class="c"><b data-count="${sc.total/20}" data-dec="1">0</b><span>de 5.0</span></div></div>
+<div><span class="eyebrow">${c.num} · ${c.title}</span><div class="lname" style="color:${lc}">${ln}</div><p class="mut">${{['Estratega de casos']:'Construiste una ruta fundamentada, prudente y bien organizada.',['Analista en formación']:'Tu análisis es sólido; algunos ajustes harán tu ruta más precisa.',['Explorador de casos']:'Identificas elementos clave, pero tu ruta aún tiene vacíos importantes.',['Ruta por reconstruir']:'Vale la pena volver al expediente: verificar antes de actuar cambia el resultado.'}[ln]}</p>
+<div class="row" style="margin:6px 0 18px"><span class="stampx">EXPEDIENTE ANALIZADO</span></div>
+<div class="mini" style="margin-top:16px;max-width:520px">${DIMS.map(([k,l,mx])=>`<div><span>${l}</span><em>${d5(sc[k])}/${d5(mx)}</em><div class="bar"><i data-w="${sc[k]/mx*100}"></i></div></div>`).join('')}</div></div></div></div>
+<div class="panel" style="margin-top:18px"><h3>Mapa de la ruta construida</h3><p class="small mut">Las etapas se iluminan según tus decisiones. Las etapas en línea punteada son oportunidades de mejora.</p><div class="map">${STEPS.map((s,i)=>`<div class="step ${steps[i]}" style="animation-delay:${i*.14}s"><span class="n">${String(i+1).padStart(2,'0')} · ${steps[i]==='ok'?'Lograda':steps[i]==='mid'?'Parcial':'Oportunidad de mejora'}</span><b>${s}</b><p>${steps[i]==='ok'?'Etapa desarrollada con fundamento.':STEP_TIP[i]}</p></div>`).join('')}</div></div>
+<div class="grid gw" style="margin-top:18px"><div class="panel"><h3 class="tq">Fortalezas</h3>${fort.length?`<ul class="list">${fort.map(x=>`<li>${x}</li>`).join('')}</ul>`:'<p class="mut">Aún no hay dimensiones por encima del 75 %. Reiniciar el caso es una buena forma de practicar.</p>'}</div><div class="panel"><h3 class="gold">Aspectos por mejorar</h3>${mej.length?`<ul class="list">${mej.map(x=>`<li>${x}</li>`).join('')}</ul>`:'<p class="mut">Todas las dimensiones superan el 60 %. Busca ahora la consistencia en cada decisión.</p>'}</div>
+<div class="panel"><h3>Decisiones mejor fundamentadas</h3>${best.length?`<ul class="list">${best.map(x=>`<li><b>${x.st.q}</b><br><span class="mut">${x.o.l}</span></li>`).join('')}</ul>`:'<p class="mut">Ninguna decisión combinó una actuación adecuada con una justificación plenamente coherente.</p>'}</div><div class="panel"><h3 class="red">Información omitida</h3>${omit.length?`<ul class="list">${omit.map(x=>`<li>${x}</li>`).join('')}</ul>`:'<p class="mut">No omitiste evidencias ni información faltante clave.</p>'}</div></div>
+<div class="grid g2" style="margin-top:18px"><div class="panel"><h3>Ruta final construida</h3><ol class="list">${cs.ord.map((i,k)=>`<li>${c.order.items[i]} ${i===k?'<span class="tq">✓</span>':'<span class="gold small">(posición sugerida: '+(i+1)+')</span>'}</li>`).join('')}</ol></div>
+<div class="panel"><h3>Ramificación de tus decisiones</h3><div class="branch">${cs.choices.map((ch,i)=>`<div class="brow"><span>${i+1}. ${c.stages[i].q}</span><div class="pills">${c.stages[i].opts.map((o,k)=>`<span class="pill ${k===ch.opt?o.v:''}">${o.s}</span>`).join('')}</div></div>`).join('')}</div></div></div>
+<p class="small mut" style="margin-top:14px">${c.refs}</p>
+<div class="row" style="margin-top:16px">${demo?'<button class="btn btn-p" data-go="expedientes">Ir a los expedientes</button>':`<button class="btn btn-p" data-act="nextcase" data-c="${id}">Siguiente paso →</button><button class="btn btn-g" data-act="reset" data-c="${id}">Reiniciar caso</button><button class="btn btn-g" data-go="expedientes">Expedientes</button>`}</div>${DISC}</div>`}
+function celebrate(id){const c=C(id),cs=S.cases[id];const[ln,lc]=level(cs.final.total);
+  $('#ovl').innerHTML=`<div class="ubox"><div class="badge">${ICON.seal}</div><span class="eyebrow">Expediente analizado</span><h3>${c.badge} desbloqueada</h3><p class="mut">${c.num} · ${c.title}</p><p style="font:700 22px Sora,system-ui,sans-serif;color:${lc}">${ln} · ${n5(cs.final.total)} / 5.0</p>${c.sober?'<p class="small mut">Gracias por abordar este caso con cuidado y con el interés del niño en el centro.</p>':''}<button class="btn btn-p" data-act="ovlclose">Ver análisis completo</button></div>`;
+  $('#ovl').classList.add('open');if(!c.sober)sparks();setTimeout(()=>$('#ovl .btn').focus(),50)}
+
+/* ============ VISTA: DESIGN THINKING ============ */
+let selPhase=3;
+const PH=[['EMPATIZAR','Comprender las necesidades de los estudiantes.','Se aplicó una encuesta a 5 estudiantes de Derecho de la Universidad San Mateo, todos con práctica en Consultorio Jurídico. Se recogieron sus dificultades al analizar y orientar casos y sus preferencias de aprendizaje.'],['DEFINIR','Identificar las dificultades para construir rutas de actuación jurídica.','Reto de diseño: ¿cómo podríamos ayudar a los estudiantes a pasar del relato de un caso a una ruta de actuación fundamentada? El 60 % reportó dificultad para establecer estrategias o rutas, y el 60 % para definir la orientación de un caso.'],['IDEAR','Explorar cartillas, casos, juegos, simuladores y otras alternativas.','Se compararon una cartilla digital, un banco de casos en documento, un juego de mesa y un simulador interactivo, según su capacidad de ofrecer práctica guiada, consecuencias y retroalimentación.'],['PROTOTIPAR','Construir RUTA, el laboratorio interactivo.','RUTA materializa la idea seleccionada: tres expedientes ficticios con evidencias, un tablero de hechos, decisiones ramificadas con consecuencias, justificación, retroalimentación, puntuación por dimensiones y un mapa de la ruta construida.']];
+function vDesign(){const p=PH[selPhase];return`<div class="wrap"><div class="head"><span class="eyebrow">Design Thinking</span><h2>Del problema al prototipo</h2><p class="mut">RUTA es el resultado de la fase de <b class="gold">prototipar</b>. Así se transformaron los hallazgos de la investigación en decisiones de diseño.</p></div>
+<div class="dt" role="tablist" aria-label="Fases de Design Thinking">${PH.map((x,i)=>`<button role="tab" aria-selected="${i===selPhase}" class="ph ${i===3?'star':''} ${i===selPhase?'sel':''}" data-act="dphase" data-i="${i}"><span class="n">${i+1}</span><b>${x[0]}</b><span>${x[1]}</span></button>`).join('')}</div>
+<div class="panel" style="margin-top:16px" role="tabpanel"><h3>${selPhase+1}. ${p[0]}</h3><p style="margin:0">${p[2]}</p></div>
+<div class="grid g2" style="margin-top:18px"><div class="panel"><h3>Población investigada</h3><div class="kpis"><div class="kpi"><b>5</b><span>estudiantes de Derecho encuestados</span></div><div class="kpi"><b>4 de 5</b><span>cursan último semestre</span></div><div class="kpi"><b>5 de 5</b><span>con práctica en Consultorio Jurídico</span></div></div><p class="small mut" style="margin-top:14px">Universidad San Mateo · Instrumento: encuesta · Muestreo no probabilístico intencional. Los porcentajes corresponden a los 5 participantes.</p></div>
+<div class="panel"><h3>Hallazgos de la encuesta</h3>${[['Dificultad para establecer estrategias o rutas de actuación jurídica',60,'3 de 5'],['Dificultad para definir la orientación de un caso',60,'3 de 5'],['Interés en casos prácticos guiados con retroalimentación',40,'2 de 5']].map(([l,v,n])=>`<div class="hbar"><span>${l} <span class="small mut">(${n})</span></span><em>${v} %</em><div class="bar"><i data-w="${v}"></i></div></div>`).join('')}</div></div>
+<div class="grid g2" style="margin-top:18px"><div class="panel"><h3>Áreas jurídicas señaladas</h3><p class="small mut">Respuesta múltiple: 15 selecciones en total (no son porcentajes de participantes).</p>${[['Civil',5],['Familia',3],['Laboral',3],['Público / administrativo',3],['Penal',1]].map(([l,v])=>`<div class="hbar"><span>${l}</span><em>${v}</em><div class="bar ${['Civil','Familia','Laboral'].includes(l)?'':'g'}"><i data-w="${v/5*100}"></i></div></div>`).join('')}<p class="small" style="margin:0">Los tres expedientes de RUTA cubren <b>civil, familia y laboral</b>, áreas entre las más señaladas.</p></div>
+<div class="panel"><h3>Del problema a sus causas</h3><p class="small mut">Hipótesis de trabajo del equipo derivadas de la encuesta.</p><div class="tree" style="grid-template-columns:1fr"><div><h4 class="red">Causas posibles</h4><ul class="list small"><li>Énfasis en contenidos normativos frente a la práctica estratégica.</li><li>Pocos espacios de casos guiados con retroalimentación inmediata.</li><li>Dificultad para pasar del relato del usuario a hechos jurídicamente relevantes.</li></ul></div><div><h4 class="gold">Consecuencias</h4><ul class="list small"><li>Orientaciones precipitadas o incompletas.</li><li>Omisión de pruebas e información clave.</li><li>Inseguridad al atender usuarios en el consultorio.</li></ul></div><div><h4 class="tq">Oportunidades de transformación</h4><ul class="list small"><li>Práctica segura con casos simulados.</li><li>Retroalimentación formativa en cada decisión.</li><li>Visualizar la ruta de actuación como un proceso.</li></ul></div></div></div></div>
+<div class="panel" style="margin-top:18px"><h3>Del hallazgo a la decisión de diseño</h3><div class="scroll"><table class="t stack"><thead><tr><th>Hallazgo</th><th>Decisión de diseño en RUTA</th></tr></thead><tbody>${[['60 % con dificultad para establecer rutas de actuación','Etapa final de construcción de la ruta y mapa visual de 8 etapas con oportunidades de mejora.'],['60 % con dificultad para definir la orientación de un caso','Tablero de hechos (relevante / falta información / no relevante) y decisión de delimitación del problema.'],['40 % interesado en casos guiados con retroalimentación','Consecuencias narrativas, retroalimentación por decisión y opción de reconsiderar.'],['5 de 5 con práctica en Consultorio Jurídico','Casos ficticios inspirados en consultas de orientación frecuentes, con usuarios y documentos verosímiles.'],['Civil, familia y laboral entre las áreas más señaladas','Tres expedientes: consumidor, laboral y familia.']].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table></div></div>
+<div class="panel" style="margin-top:18px"><h3>Exploración de alternativas (ideación)</h3><p class="small mut">Valoración del equipo de diseño frente a las necesidades encontradas.</p><div class="scroll"><table class="t"><thead><tr><th>Alternativa</th><th>Casos guiados</th><th>Decisiones con consecuencias</th><th>Retroalimentación inmediata</th><th>Ruta visual</th><th>Escalable</th></tr></thead><tbody>${[['Cartilla digital','Parcial','No','No','Parcial','Sí'],['Banco de casos en documento','Sí','No','No','No','Sí'],['Juego de mesa','Sí','Sí','Parcial','Parcial','No'],['Simulador RUTA','Sí','Sí','Sí','Sí','Sí']].map(r=>`<tr${r[0]==='Simulador RUTA'?' style="color:#F4B942;font-weight:600"':''}><td>${r[0]}</td>${r.slice(1).map(x=>`<td class="c">${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>
+<div class="panel" style="margin-top:18px" id="bitacora"><h3>Bitácora del prototipo: cambios y mejoras</h3><div class="ver"><div><b class="v">v0.1</b><span><b>Concepto: SIMULALEX.</b> Propuesta inicial de simulador interactivo surgida en la ideación.</span></div><div><b class="v">v1.0</b><span><b>Prototipo funcional: RUTA.</b> Se renombra para enfatizar la construcción de rutas. Se incorporan tablero de hechos, justificación de cada decisión, reconsideración, consecuencias encadenadas, mapa de ruta final, evaluación de usuario y matriz de rúbrica.</span></div></div></div>${DISC}</div>`}
+
+/* ============ VISTA: EVALUACIÓN ============ */
+const SQ=['¿El caso fue fácil de comprender?','¿Las evidencias fueron suficientes?','¿Las decisiones fueron claras?','¿La retroalimentación ayudó a comprender los errores?','¿El simulador le permitió pensar en una ruta de actuación?'];
+const DEMO_SURVEY={n:8,avg:[4.4,3.9,4.1,4.5,4.3],txt:['Agregar un temporizador opcional para simular la presión de la atención real.','Incluir más documentos en el caso laboral.']};
+let draft={a:[],t:''},showDemo=false;
+function vSurvey(){
+  const n=S.survey.length,done=CASES.filter(c=>S.cases[c.id].done).length;
+  const avg=SQ.map((_,i)=>n?S.survey.reduce((a,r)=>a+r.a[i],0)/n:0);
+  const res=(arr,cnt,txt,isDemo)=>`<div class="panel ${isDemo?'demo-flag':''}" style="margin-top:${isDemo?'26px':'0'}"><h3>${isDemo?'Panel de ejemplo':'Resultados de la experiencia'}</h3><p class="small mut">${isDemo?'Valores inventados solo para mostrar cómo se verá el panel. No provienen de ninguna prueba.':`${cnt} respuesta${cnt===1?'':'s'} registrada${cnt===1?'':'s'} en este navegador. Sirven para valorar la experiencia con el prototipo.`}</p>${cnt?SQ.map((q,i)=>`<div class="hbar"><span class="small">${q}</span><em>${arr[i].toFixed(1)}</em><div class="bar ${isDemo?'g':''}"><i data-w="${arr[i]/5*100}"></i></div></div>`).join('')+(txt.length?`<h4 style="margin-top:14px">¿Qué mejoraría?</h4><ul class="list small">${txt.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''):'<p class="mut" style="margin:0">Aún no hay respuestas. Completa el formulario para ver el panel.</p>'}</div>`;
+  return`<div class="wrap"><div class="head"><span class="eyebrow">Evaluación del prototipo</span><h2>¿Cómo fue tu experiencia en RUTA?</h2><p class="mut">${done<3?`Has completado ${done} de 3 expedientes. Lo ideal es responder al terminar los casos, aunque puedes hacerlo cuando quieras.`:'Completaste los tres expedientes. Tu opinión orienta la siguiente versión.'}</p></div>
+<div class="grid g2" style="align-items:start"><form class="panel" id="sv">${SQ.map((q,i)=>`<fieldset style="border:0;padding:0;margin:0"><legend><b>${i+1}. ${q}</b></legend><div class="lik">${[1,2,3,4,5].map(v=>`<button type="button" class="${draft.a[i]===v?'on':''}" data-act="lik" data-i="${i}" data-v="${v}" aria-pressed="${draft.a[i]===v}" aria-label="${v} de 5">${v}</button>`).join('')}</div></fieldset>`).join('')}<p class="small mut" style="margin-top:-8px">1 = muy en desacuerdo · 5 = muy de acuerdo</p><label for="svt"><b>6. ¿Qué mejoraría de la experiencia?</b></label><textarea id="svt" class="inp" data-inp="svt" style="margin-top:8px">${esc(draft.t)}</textarea><div class="row" style="margin-top:16px"><button class="btn btn-p" type="submit" ${draft.a.filter(Boolean).length===5?'':'disabled'}>Enviar evaluación</button></div></form>
+<div>${REMOTE?`<div class="panel" style="margin-bottom:18px;border-color:rgba(64,224,208,.5)"><h3>Respuestas en la base de datos</h3><p class="small mut">${REMOTE.n} respuesta${REMOTE.n===1?'':'s'} guardada${REMOTE.n===1?'':'s'} en Firebase por todas las personas que usaron RUTA.</p>${REMOTE.n?SQ.map((q,i)=>`<div class="hbar"><span class="small">${q}</span><em>${REMOTE.avg[i].toFixed(1)}</em><div class="bar"><i data-w="${REMOTE.avg[i]/5*100}"></i></div></div>`).join('')+(REMOTE.txt.length?`<h4 style="margin-top:14px">¿Qué mejoraría?</h4><ul class="list small">${REMOTE.txt.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''):'<p class="mut" style="margin:0">Aún no hay respuestas guardadas.</p>'}</div>`:''}${res(avg,n,S.survey.map(r=>r.t).filter(Boolean),false)}<div class="row" style="margin-top:14px"><button class="btn btn-g" data-act="copysv" ${n?'':'disabled'}>Copiar respuestas (CSV)</button><button class="btn btn-g btn-d" data-act="clrsv" ${n?'':'disabled'}>Borrar respuestas</button><button class="btn btn-g" data-act="demosv" aria-pressed="${showDemo}">${showDemo?'Ocultar':'Ver'} panel de ejemplo</button></div>${showDemo?res(DEMO_SURVEY.avg,DEMO_SURVEY.n,DEMO_SURVEY.txt,true):''}<div id="csvbox"></div></div></div>${DISC}</div>`}
+
+/* ============ VISTA: MATRIZ ============ */
+const RUB=[
+{t:'Identificación y fundamentación del problema',d:'Delimitación de la problemática a partir de la investigación con estudiantes de Derecho.',ev:[['Problemática claramente delimitada','proceso'],['Contextualización de los estudiantes de Derecho','proceso'],['Evidencia de la investigación inicial','proceso'],['Relación entre las dificultades encontradas y la propuesta','proceso'],['Causas, consecuencias y oportunidades de transformación','proceso']]},
+{t:'Investigación y comprensión del contexto',d:'Caracterización de la población, instrumentos, resultados e interpretación que justifican el diseño.',ev:[['Caracterización de la población','proceso'],['Instrumentos de indagación','proceso'],['Resultados obtenidos','proceso'],['Interpretación de los datos','proceso'],['Justificación de las decisiones de diseño','proceso'],['Relación entre usuarios, problemática y producto','proceso']]},
+{t:'Creatividad y conceptualización de la propuesta',d:'Concepto de laboratorio de expedientes con narrativa, ramificaciones y gamificación pertinente.',ev:[['Concepto innovador claramente definido','inicio'],['Exploración de alternativas','proceso'],['Originalidad de la propuesta','expedientes'],['Narrativa de casos','expedientes'],['Decisiones ramificadas','expedientes'],['Gamificación pertinente','panel'],['Relación coherente entre el usuario y la solución','proceso'],['Diferenciación frente a una cartilla o recurso tradicional','proceso']]},
+{t:'Desarrollo y materialización de la innovación',d:'Prototipo digital funcional, probado y con evidencias de evolución.',ev:[['Prototipo digital funcional','panel'],['Tres casos interactivos','expedientes'],['Expedientes y documentos','expedientes'],['Rutas de decisión','resultado-demo'],['Retroalimentación','resultado-demo'],['Sistema de progreso','panel'],['Evaluación de usuario','evaluacion','auto'],['Evidencias de cambios y mejoras','proceso']]}];
+function rubOn(ci,ei){const e=RUB[ci].ev[ei];if(e[2]==='auto')return S.survey.length>0||!!(REMOTE&&REMOTE.n);const k=ci+'-'+ei;return S.rubric[k]!==false}
+function vMatrix(){
+  const all=RUB.flatMap((r,ci)=>r.ev.map((_,ei)=>rubOn(ci,ei)));const g=r0(all.filter(Boolean).length/all.length*100);
+  return`<div class="wrap"><div class="head"><span class="eyebrow">Presentación · uso del equipo</span><h2>Matriz de innovación y evaluación del proyecto</h2><p class="mut">Cuatro criterios de la rúbrica académica, cada uno con un peso del 25 %. Cada evidencia enlaza al lugar del prototipo donde se demuestra. Es una autoevaluación del equipo, no la calificación docente.</p></div>
+<div class="panel" style="margin-bottom:18px"><div class="row" style="justify-content:space-between"><div><h3 style="margin:0">Avance global de evidencias</h3><span class="small mut">Nivel superior esperado en cada criterio: 4.5–5.0</span></div><b style="font:800 40px Sora,sans-serif" class="gold" data-count="${g}">0</b></div><div class="bar g" style="margin-top:10px;height:10px"><i data-w="${g}"></i></div></div>
+<div class="grid g2">${RUB.map((r,ci)=>{const on=r.ev.map((_,ei)=>rubOn(ci,ei)),p=r0(on.filter(Boolean).length/on.length*100),st=p>=90?['Evidencia completa','ok']:p>=60?['En consolidación','gold']:['Por fortalecer','red'],L=2*Math.PI*34;return`<article class="panel crit"><div class="top2"><div class="gauge"><svg viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" stroke="rgba(255,255,255,.08)"/><circle cx="42" cy="42" r="34" stroke="url(#gg)" stroke-linecap="round" stroke-dasharray="${L}" stroke-dashoffset="${L}" data-off="${L*(1-p/100)}" style="transition:stroke-dashoffset 1.3s"/></svg><b>${p}%</b></div><div><span class="eyebrow">Criterio ${ci+1} · Peso 25 %</span><h3 style="margin:0">${r.t}</h3></div></div><p class="mut small" style="margin:0">${r.d}</p><div class="row"><span class="tag ${st[1]}">${st[0]}</span><span class="tag">Nivel superior: 4.5–5.0</span></div><div>${r.ev.map((e,ei)=>{const o=on[ei];return`<button class="chk ${o?'on':''} ${e[2]==='auto'?'auto':''}" ${e[2]==='auto'?'':`data-act="rub" data-k="${ci}-${ei}"`} aria-pressed="${o}"><i></i><span>${e[0]}${e[2]==='auto'?` <span class="small ${o?'tq':'gold'}">· ${o?'con respuestas registradas':'sin respuestas registradas'}</span>`:''} <a href="#${e[1]}" data-go="${e[1]}">ver</a></span></button>`}).join('')}</div></article>`}).join('')}</div>${DISC}</div>`}
+
+/* ============ VISTA: CIERRE ============ */
+function vClose(){const done=CASES.filter(c=>S.cases[c.id].done).length;
+  const K=['INVESTIGACIÓN','PROBLEMÁTICA','IDEACIÓN','PROTOTIPO'];
+  const items=[['La problemática identificada','Dificultad de los estudiantes de Derecho para establecer estrategias y rutas de actuación jurídica al analizar y orientar casos.'],['La población investigada','5 estudiantes de Derecho de la Universidad San Mateo (4 de último semestre), todos con práctica en Consultorio Jurídico.'],['El hallazgo principal','El 60 % reportó dificultad para establecer rutas de actuación y el 60 % para definir la orientación de un caso.'],['La solución desarrollada','RUTA: un simulador de toma de decisiones jurídicas con expedientes, consecuencias y retroalimentación.'],['Los tres casos diseñados','Consumidor (“La entrega que nunca llegó”), laboral (“Un último día sin respuestas”) y familia (“Una obligación pendiente”).'],['El prototipo materializado','Plataforma web funcional y adaptable con evidencias, tablero de hechos, decisiones ramificadas, puntuación por dimensiones y mapa de ruta.'],['El proceso de evaluación','El proyecto llega hasta la fase de prototipar. Incluye un instrumento para valorar la experiencia con el prototipo y una matriz de rúbrica para sustentarlo.'],['Las oportunidades de mejora','Ampliar documentos y casos, ajustar la dificultad y revisar los tiempos de resolución.'],['Potencial de implementación futura','Entrenamiento previo al Consultorio Jurídico, banco de casos editable por docentes, nuevas áreas (penal, público) y panel docente con analítica.']];
+  return`<div class="wrap" style="text-align:center"><span class="eyebrow">Cierre del recorrido</span><h2>RUTA COMPLETADA: DE LA INVESTIGACIÓN A LA INNOVACIÓN</h2><p class="mut" style="max-width:60ch;margin:0 auto 22px">${done===3?'Los tres expedientes están analizados.':`Expedientes analizados: ${done} de 3. Este resumen del proyecto está disponible en todo momento.`}</p>
+<div class="chain" aria-label="Cadena del proyecto">${K.map((k,i)=>`${i?`<span class="a" style="animation-delay:${i*.3-.15}s"></span>`:''}<span class="k ${k==='PROTOTIPO'?'hi':''}" style="animation-delay:${i*.3}s">${k}</span>`).join('')}</div>
+<div class="closing" aria-hidden="true"><div class="f"></div><div class="lid">RUTA</div><div class="stamp">EXPEDIENTE CERRADO</div></div></div>
+<div class="wrap" style="padding-top:0"><div class="grid g3">${items.map((x,i)=>`<div class="panel" style="animation:fadeUp .6s ${.2+i*.08}s both"><h4>${x[0]}</h4><p style="margin:0">${x[1]}</p></div>`).join('')}</div>
+<div class="row" style="justify-content:center;margin-top:22px"><button class="btn btn-p" data-go="matriz">Ver matriz de evaluación</button><button class="btn btn-g" data-go="evaluacion">Evaluar el prototipo</button><button class="btn btn-g" data-go="inicio">Volver al inicio</button></div>${DISC}</div>`}
+
+/* ============ RECORRIDO DEMOSTRATIVO ============ */
+let tourOn=false,tourI=0;
+const TOUR=[['inicio','RUTA en un minuto','Un laboratorio para practicar la construcción de rutas de actuación jurídica con casos simulados. Este recorrido muestra cada módulo sin necesidad de resolver los casos.'],['panel','Panel del investigador','Perfil, progreso general, casos completados, puntaje acumulado y seis habilidades que se calculan con las decisiones.'],['expedientes','Tres expedientes','Consumidor, laboral y familia: las áreas entre las más señaladas por los estudiantes. Cada uno con narrativa, personajes y documentos propios.'],['caso-c1','Dentro de un expediente','Apertura, evidencias que se abren como documentos, tablero de hechos, cuatro decisiones con consecuencias y la construcción final de la ruta. A la derecha, la ruta se ilumina en vivo.'],['resultado-demo','Resultado y ruta final','Puntaje por dimensiones, nivel de desempeño, fortalezas, aspectos por mejorar, información omitida y el mapa de 8 etapas con oportunidades de mejora.'],['proceso','Del problema al prototipo','Cómo los hallazgos de la encuesta se convirtieron en decisiones de diseño, con la fase de prototipar destacada.'],['evaluacion','Evaluación del prototipo','Seis preguntas para valorar la experiencia con el prototipo. El panel solo muestra respuestas reales registradas; el ejemplo está marcado como ficticio.'],['matriz','Matriz de la rúbrica','Los cuatro criterios (25 % cada uno) con sus evidencias enlazadas al prototipo y su nivel de avance.'],['cierre','De la investigación a la innovación','La síntesis final del proyecto: problemática, población, hallazgo, solución, evaluación y potencial de implementación.']];
+function renderTour(){const t=TOUR[tourI];$('#tour').innerHTML=`<div class="panel"><div class="row" style="justify-content:space-between"><span class="tag gold">Recorrido ${tourI+1} / ${TOUR.length}</span><button class="mclose" style="background:transparent;color:#F3F6FC;border-color:rgba(76,169,255,.3)" data-act="tourx" aria-label="Salir del recorrido">×</button></div><h3 style="margin-top:10px">${t[1]}</h3><p class="small" style="margin-bottom:14px">${t[2]}</p><div class="row"><button class="btn btn-g" data-act="tourp" ${tourI?'':'disabled'}>← Anterior</button><button class="btn btn-p" data-act="tourn">${tourI<TOUR.length-1?'Siguiente →':'Finalizar'}</button></div></div>`;$('#tour').classList.add('open')}
+function tourGo(i){tourI=i;go(TOUR[i][0]);renderTour()}
+
+/* ============ MODAL / CONFIRM ============ */
+function openEvid(id,i){const c=C(id),cs=S.cases[id],e=c.evid[i];const first=!cs.opened.includes(i);if(first){cs.opened.push(i);save()}
+  $('#modal').innerHTML=`<div class="mbox"><div class="mhead"><div><small>${c.num} · DOC ${String(i+1).padStart(2,'0')} · ${e.k}</small><b>${e.t}</b></div><button class="mclose" data-act="mclose" aria-label="Cerrar documento">×</button></div><div class="mbody doc ${e.mono?'mono':''}">${e.h}<p class="fic">Documento ficticio elaborado con fines académicos.</p></div></div>`;
+  $('#modal').classList.add('open');setTimeout(()=>$('#modal .mclose').focus(),30);if(first){rerender();floatPts(2,$('#modal .mbox'))}}
+function closeModal(){$('#modal').classList.remove('open');$('#modal').innerHTML=''}
+function ask(msg,yes){const d=document.createElement('div');d.className='confirm';d.innerHTML=`<div class="panel" style="max-width:420px"><h3>${msg}</h3><p class="small mut">Esta acción no se puede deshacer.</p><div class="row"><button class="btn btn-g" data-x="no">Cancelar</button><button class="btn btn-p" data-x="yes">Confirmar</button></div></div>`;document.body.appendChild(d);d.querySelector('[data-x=no]').focus();d.addEventListener('click',ev=>{const x=ev.target.closest('[data-x]');if(!x&&ev.target!==d)return;d.remove();if(x&&x.dataset.x==='yes')yes()})}
+
+/* ============ EVENTOS ============ */
+function caseId(){const m=cur.match(/^caso-(c[123])$/);return m?m[1]:null}
+document.addEventListener('click',ev=>{
+  const g=ev.target.closest('[data-go]');if(g){ev.preventDefault();if(g.closest('#ovl'))$('#ovl').classList.remove('open');go(g.dataset.go);return}
+  const b=ev.target.closest('[data-act]');if(!b){if(ev.target.id==='modal')closeModal();return}
+  const a=b.dataset.act,id=caseId(),c=id&&C(id),cs=id&&S.cases[id],i=+b.dataset.i;
+  switch(a){
+  case'start':go('caso-'+b.dataset.c);break;
+  case'continue':{const p=CASES.find(x=>S.cases[x.id].started&&!S.cases[x.id].done)||CASES.find(x=>!S.cases[x.id].done);go(p?'caso-'+p.id:(S.survey.length?'cierre':'evaluacion'));break}
+  case'phase':cs.phase=b.dataset.p;warnEvid=false;save();rerender();window.scrollTo({top:0,behavior:S.rm?'auto':'smooth'});break;
+  case'evid':openEvid(id,i);break;
+  case'mclose':closeModal();break;
+  case'tofacts':if(cs.opened.length<c.evid.length){warnEvid=true;rerender()}else{cs.phase='facts';save();rerender()}break;
+  case'warnoff':warnEvid=false;rerender();break;
+  case'bin':cs.facts[i]=b.dataset.b;save();rerender();break;
+  case'factsok':{cs.factsDone=true;save();const n=score(c,cs).hechos;rerender();floatPts(n,$('.case .panel'));break}
+  case'opt':{const ch=cs.choices[cs.stage]||(cs.choices[cs.stage]={recon:0});if(ch.done)break;ch.opt=i;ch.just=null;save();rerender();break}
+  case'just':cs.choices[cs.stage].just=i;save();rerender();break;
+  case'decide':{const before=score(c,cs).total;cs.choices[cs.stage].done=true;save();const d=score(c,cs).total-before;rerender();floatPts(d,$('.verdict'));if(c.stages[cs.stage].opts[cs.choices[cs.stage].opt].v==='riesgosa')toast('Indicador de riesgo: revisa la consecuencia de esta decisión.');break}
+  case'recon':{const ch=cs.choices[cs.stage];ch.done=false;ch.recon=(ch.recon||0)+1;ch.opt=null;ch.just=null;save();rerender();break}
+  case'next':if(cs.stage<3)cs.stage++;else cs.phase='order';save();rerender();window.scrollTo({top:0,behavior:S.rm?'auto':'smooth'});break;
+  case'ordadd':cs.ord.push(i);save();rerender();break;
+  case'ordrm':cs.ord=cs.ord.filter(x=>x!==i);save();rerender();break;
+  case'ordclr':cs.ord=[];save();rerender();break;
+  case'ordok':{cs.orderDone=true;save();rerender();floatPts(orderPts(c,cs),$('.verdict'));break}
+  case'finish':cs.done=true;cs.final=score(c,cs);save();saveResultDB(id,cs.final);go('resultado-'+id);break;
+  case'reset':{const cid=b.dataset.c;ask(`¿Reiniciar ${C(cid).num}?`,()=>{S.cases[cid]=blank();delete prevLive[cid];['intro-'+cid,'open-'+cid].forEach(k=>typed.delete(k));save();toast('Expediente reiniciado.');if(cur.endsWith(cid))go('caso-'+cid);else rerender()});break}
+  case'resetall':ask('¿Reiniciar todo el progreso?',()=>{const nm=S.name,sv=S.survey,rb=S.rubric,rm=S.rm;S=fresh();S.name=nm;S.survey=sv;S.rubric=rb;S.rm=rm;typed.clear();save();toast('Progreso reiniciado. Se conservan tu nombre y las evaluaciones.');rerender()});break;
+  case'nextcase':{const nx=CASES.find(x=>!S.cases[x.id].done);go(nx?'caso-'+nx.id:'evaluacion');break}
+  case'ovlclose':$('#ovl').classList.remove('open');break;
+  case'rm':S.rm=!S.rm;document.body.classList.toggle('rm',S.rm);save();toast(S.rm?'Animaciones reducidas.':'Animaciones activadas.');renderTop(cur||'inicio');fx();break;
+  case'tour':tourOn=true;tourGo(0);break;
+  case'tourn':if(tourI<TOUR.length-1)tourGo(tourI+1);else{tourOn=false;$('#tour').classList.remove('open');toast('Recorrido finalizado.')}break;
+  case'tourp':if(tourI>0)tourGo(tourI-1);break;
+  case'tourx':tourOn=false;$('#tour').classList.remove('open');break;
+  case'dphase':selPhase=i;rerender();break;
+  case'lik':draft.a[i]=+b.dataset.v;rerender();break;
+  case'demosv':showDemo=!showDemo;rerender();break;
+  case'clrsv':ask('¿Borrar las respuestas registradas en este navegador?',()=>{S.survey=[];save();rerender()});break;
+  case'copysv':{const csv=['fecha,'+SQ.map((_,k)=>'p'+(k+1)).join(',')+',mejora',...S.survey.map(r=>[r.d,...r.a,'"'+(r.t||'').replace(/"/g,'""')+'"'].join(','))].join('\n');const done=()=>toast('Respuestas copiadas en formato CSV.');try{navigator.clipboard.writeText(csv).then(done,()=>showCsv(csv))}catch(e){showCsv(csv)}break}
+  case'rub':{const k=b.dataset.k;S.rubric[k]=S.rubric[k]===false;save();rerender();break}
+  }
+});
+function showCsv(csv){$('#csvbox').innerHTML=`<p class="small mut" style="margin-top:12px">No fue posible copiar automáticamente. Selecciona y copia el texto:</p><textarea class="inp" readonly>${esc(csv)}</textarea>`}
+document.addEventListener('submit',ev=>{if(ev.target.id!=='sv')return;ev.preventDefault();if(draft.a.filter(Boolean).length<5)return;const ans=draft.a.slice(0,5),txt=draft.t.trim();S.survey.push({d:new Date().toISOString().slice(0,10),a:ans,t:txt});draft={a:[],t:''};save();rerender();if(DB)saveSurveyDB(ans,txt).then(ok=>toast(ok?'Gracias. Tu evaluación quedó guardada en la base de datos.':'Se guardó en este navegador; no fue posible enviarla a la base de datos.'));else toast('Gracias. Tu evaluación quedó registrada en este navegador.')});
+document.addEventListener('input',ev=>{const k=ev.target.dataset.inp;if(k==='name'){S.name=ev.target.value.slice(0,40);save()}if(k==='svt')draft.t=ev.target.value});
+document.addEventListener('change',ev=>{if(ev.target.dataset.inp==='name')rerender()});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){if($('#modal').classList.contains('open'))closeModal();else if($('#ovl').classList.contains('open'))$('#ovl').classList.remove('open')}});
+
+/* ============ PARTÍCULAS ============ */
+const cv=$('#fx'),cx=cv.getContext('2d');let P=[],raf=0;
+function sizeFx(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;P=Array.from({length:Math.min(42,Math.round(innerWidth/32))},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:(Math.random()-.5)*.18*devicePixelRatio,vy:(Math.random()-.5)*.18*devicePixelRatio,r:(Math.random()*1.4+.4)*devicePixelRatio}))}
+function frame(){cx.clearRect(0,0,cv.width,cv.height);const D=130*devicePixelRatio;for(const p of P){p.x=(p.x+p.vx+cv.width)%cv.width;p.y=(p.y+p.vy+cv.height)%cv.height;cx.fillStyle='rgba(120,200,255,.6)';cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}for(let a=0;a<P.length;a++)for(let b2=a+1;b2<P.length;b2++){const dx=P[a].x-P[b2].x,dy=P[a].y-P[b2].y,d=Math.hypot(dx,dy);if(d<D){cx.strokeStyle=`rgba(64,224,208,${.12*(1-d/D)})`;cx.lineWidth=devicePixelRatio*.6;cx.beginPath();cx.moveTo(P[a].x,P[a].y);cx.lineTo(P[b2].x,P[b2].y);cx.stroke()}}raf=requestAnimationFrame(frame)}
+function fx(){cancelAnimationFrame(raf);if(S.rm){cx.clearRect(0,0,cv.width,cv.height);return}frame()}
+const onResize=()=>{sizeFx();fx()};addEventListener('resize',onResize);document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else fx()});
+sizeFx();fx();
+
+/* ============ INICIO ============ */
+cur=location.hash.slice(1)||'inicio';render(cur,false);initDB();
+}
+</script>
+</body>
+</html>
